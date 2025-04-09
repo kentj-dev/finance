@@ -2,16 +2,53 @@ import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { type NavItem } from '@/types';
+import { NavGroup, type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import { BookOpen, Code, CodeXml, Folder, LayoutGrid, Pi } from 'lucide-react';
 import AppLogo from './app-logo';
 
-const mainNavItems: NavItem[] = [
+const mainNavItems: NavGroup[] = [
     {
-        title: 'Dashboard',
-        href: '/dashboard',
-        icon: LayoutGrid,
+        title: 'Platform',
+        items: [
+            {
+                title: 'Dashboard',
+                href: '/dashboard',
+                icon: LayoutGrid,
+            },
+            {
+                title: 'Programs',
+                href: '#',
+                icon: Pi,
+                subItems: [
+                    {
+                        title: 'Programs 1',
+                        href: '/settings/profile',
+                        icon: Pi,
+                    },
+                    {
+                        title: 'Programs 2',
+                        href: '#',
+                        icon: Pi,
+                    },
+                ]
+            },
+        ],
+    },
+    {
+        title: 'Example 2',
+        items: [
+            {
+                title: 'Route 1',
+                href: '#',
+                icon: Code,
+            },
+            {
+                title: 'Route 2',
+                href: '#',
+                icon: CodeXml,
+            },
+        ],
     },
 ];
 
