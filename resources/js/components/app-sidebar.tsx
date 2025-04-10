@@ -15,6 +15,10 @@ const mainNavItems: NavGroup[] = [
                 title: 'Dashboard',
                 href: '/dashboard',
                 icon: LayoutGrid,
+                routes: [
+                    '/dashboard',
+                    '/view-user',
+                ]
             },
             {
                 title: 'Programs',

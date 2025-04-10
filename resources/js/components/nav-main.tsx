@@ -12,6 +12,7 @@ import { type NavGroup } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { ChevronRight } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
+import { isRouteActive } from '@/lib/utils';
 
 export function NavMain({ items = [] }: { items: NavGroup[] }) {
     const page = usePage();
@@ -30,7 +31,7 @@ export function NavMain({ items = [] }: { items: NavGroup[] }) {
                         >
                             <SidebarMenuItem>
                                 <CollapsibleTrigger asChild>
-                                    <SidebarMenuButton tooltip={item.title} isActive={item.href === page.url}>
+                                    <SidebarMenuButton tooltip={item.title} isActive={isRouteActive(page.url, item.href, item.routes)}>
                                         {item.icon && <item.icon />}
                                         <span>{item.title}</span>
                                         <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -40,7 +41,7 @@ export function NavMain({ items = [] }: { items: NavGroup[] }) {
                                     <SidebarMenuSub>
                                         {item.subItems.map((subItem) => (
                                             <SidebarMenuSubItem key={subItem.title}>
-                                                <SidebarMenuSubButton asChild isActive={subItem.href === page.url}>
+                                                <SidebarMenuSubButton asChild isActive={isRouteActive(page.url, subItem.href)}>
                                                     <Link href={subItem.href} prefetch>
                                                         <span>{subItem.title}</span>
                                                     </Link>
@@ -53,7 +54,7 @@ export function NavMain({ items = [] }: { items: NavGroup[] }) {
                         </Collapsible>
                     ) : (
                         <SidebarMenuItem key={item.title}>
-                            <SidebarMenuButton tooltip={item.title} isActive={item.href === page.url} asChild>
+                            <SidebarMenuButton tooltip={item.title} isActive={isRouteActive(page.url, item.href, item.routes)} asChild>
                                 <Link href={item.href} prefetch>
                                     {item.icon && <item.icon />}
                                     <span>{item.title}</span>
