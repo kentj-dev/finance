@@ -8,6 +8,7 @@ import { SharedData, User, type BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -45,12 +46,25 @@ export default function Dashboard({ users, filters }: DashboardProps) {
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        post(route('dashboard.register-user'), {
-            preserveScroll: true,
-            onFinish: () => {
-                reset('name', 'email', 'password', 'password_confirmation');
-                setOpen(false);
-            },
+        const promise = new Promise<void>((resolve, reject) => {
+            post(route('dashboard.register-user'), {
+                preserveScroll: true,
+                onSuccess: () => {
+                    reset();
+                    setOpen(false);
+                    resolve();
+                },
+                onError: () => {
+                    reject();
+                },
+            });
+        });
+
+        toast.promise(promise, {
+            loading: 'Creating user...',
+            success: 'User created!',
+            error: 'Failed to create user.',
+            duration: 5000,
         });
     };
 
@@ -166,7 +180,6 @@ export default function Dashboard({ users, filters }: DashboardProps) {
                                         type="password"
                                         required
                                         tabIndex={3}
-                                        autoComplete="new-password"
                                         value={data.password}
                                         onChange={(e) => setData('password', e.target.value)}
                                         disabled={processing}
@@ -181,7 +194,6 @@ export default function Dashboard({ users, filters }: DashboardProps) {
                                         type="password"
                                         required
                                         tabIndex={4}
-                                        autoComplete="new-password"
                                         value={data.password_confirmation}
                                         onChange={(e) => setData('password_confirmation', e.target.value)}
                                         disabled={processing}
