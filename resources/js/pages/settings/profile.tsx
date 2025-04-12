@@ -17,6 +17,7 @@ import SettingsLayout from '@/layouts/settings/layout';
 import getCroppedImg from '@/utils/cropImage';
 import Cropper, { Area } from 'react-easy-crop';
 import { toast } from 'sonner';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -28,6 +29,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 type ProfileForm = {
     name: string;
     new_avatar: File | null;
+    remove_avatar: boolean;
     email: string;
 };
 
@@ -38,20 +40,21 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
     const { data, setData, post, errors, processing, recentlySuccessful, reset } = useForm<Required<ProfileForm>>({
         name: auth.user.name,
         new_avatar: null,
+        remove_avatar: false,
         email: auth.user.email,
     });
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-
         const promise = new Promise<void>((resolve, reject) => {
-            post(route('dashboard.update-user', auth.user.id), {
+            post(route('profile.update', auth.user.id), {
                 preserveScroll: true,
                 onSuccess: () => {
                     reset('new_avatar');
                     resolve();
                     setCrop({ x: 0, y: 0 });
                     setZoom(1);
+                    inputFileRef.current!.value = '';
                 },
                 onError: () => {
                     reject();
@@ -99,6 +102,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
         });
 
         setData('new_avatar', croppedFile);
+        setData('remove_avatar', false);
         setShowCropModal(false);
     };
 
@@ -133,6 +137,23 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         </DialogContent>
                     </Dialog>
                     <form onSubmit={submit} className="space-y-6">
+                        <div className="flex items-center space-x-2">
+                            <Checkbox
+                                id="verified"
+                                checked={data.remove_avatar}
+                                onCheckedChange={(e) => {
+                                    setData('remove_avatar', e as boolean);
+                                    setData('new_avatar', null);
+                                    inputFileRef.current!.value = '';
+                                }} 
+                            />
+                            <label
+                                htmlFor="verified"
+                                className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                                Remove Avatar
+                            </label>
+                        </div>
                         <div className="grid gap-2">
                             <Label htmlFor="avatar">New Avatar</Label>
                             <Input type="file" id="avatar" name="avatar" accept="image/*" onChange={onFileChange} ref={inputFileRef} />

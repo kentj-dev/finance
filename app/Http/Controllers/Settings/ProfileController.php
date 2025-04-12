@@ -31,8 +31,8 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $id = $request->route('id');
-
+        $id = auth()->id();
+        
         $validated = $request->validate([
             'name' => [
                 'required',
@@ -41,6 +41,7 @@ class ProfileController extends Controller
                 Rule::unique('users')->ignore($id),
             ],
             'new_avatar' => 'nullable|image|max:2048',
+            'remove_avatar' => 'required|boolean',
             'email' => [
                 'required',
                 'email',
@@ -55,7 +56,7 @@ class ProfileController extends Controller
             'name' => $request->name,
             'email' => $request->email,
         ];
-
+  
         if ($request->hasFile('new_avatar')) {
             if ($user->avatar && \Storage::disk('public')->exists($user->avatar)) {
                 \Storage::disk('public')->delete($user->avatar);
@@ -63,6 +64,13 @@ class ProfileController extends Controller
 
             $avatarPath = $request->file('new_avatar')->store('avatars', 'public');
             $updateData['avatar'] = $avatarPath;
+        }
+
+        if ($request->boolean('remove_avatar')) {
+            if ($user->avatar && \Storage::disk('public')->exists($user->avatar)) {
+                \Storage::disk('public')->delete($user->avatar);
+            }
+            $updateData['avatar'] = null;
         }
 
         $user->update($updateData);
