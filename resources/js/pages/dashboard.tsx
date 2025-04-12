@@ -177,7 +177,7 @@ export default function Dashboard({ users, filters, allUsersCount }: DashboardPr
                     <div className="flex w-full items-center justify-between gap-3 sm:w-max">
                         <Dialog open={open} onOpenChange={setOpen}>
                             <DialogTrigger asChild>
-                                <Button variant="success" className="w-max rounded-lg">
+                                <Button variant="success" className="w-max rounded-lg bg-[#050708]">
                                     <Plus />
                                     Add User
                                 </Button>

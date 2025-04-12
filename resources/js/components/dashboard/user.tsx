@@ -79,19 +79,18 @@ export function UserList({ user, auth, selectedUsers, setSelectedUsers }: UserLi
                 <div className="flex items-center gap-2">
                     <Link
                         href={route('dashboard.view-user', user.id)}
-                        className="flex cursor-default items-center gap-2 rounded-md bg-amber-600 px-2 py-0.5 text-white shadow-xs hover:bg-amber-700"
+                        className="flex cursor-default items-center gap-2 rounded-lg bg-[#3b5998] px-3 py-1 text-white shadow-xs hover:bg-[#3b5998]/90"
                         prefetch
                     >
-                        <ExternalLink size={12} />
+                        <ExternalLink size={14} />
                         View
                     </Link>
-
                     {auth.user.id !== user.id && (
                         <button
-                            className="flex cursor-default items-center gap-2 rounded-md bg-red-700 px-2 py-0.5 text-white shadow-xs hover:bg-red-800"
+                            className="flex cursor-default items-center gap-2 rounded-lg bg-[#983b3b] px-3 py-1 text-white shadow-xs hover:bg-[#983b3b]/90"
                             onClick={() => deleteUser(user.id)}
                         >
-                            <Trash2 size={16} />
+                            <Trash2 size={14} />
                             Delete
                         </button>
                     )}
