@@ -42,12 +42,20 @@ class DashboardController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255|unique:' . User::class,
+            'avatar' => 'nullable|image|max:2048',
             'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+        } else {
+            $avatarPath = null;
+        }
+
         $user = User::create([
             'name' => $request->name,
+            'avatar' => $avatarPath,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
@@ -96,6 +104,7 @@ class DashboardController extends Controller
                 'max:255',
                 Rule::unique('users')->ignore($id),
             ],
+            'new_avatar' => 'nullable|image|max:2048',
             'email' => [
                 'required',
                 'email',
@@ -106,10 +115,21 @@ class DashboardController extends Controller
 
         $user = User::findOrFail($id);
 
-        $user->update([
+        $updateData = [
             'name' => $request->name,
             'email' => $request->email,
-        ]);
+        ];
+
+        if ($request->hasFile('new_avatar')) {
+            if ($user->avatar && \Storage::disk('public')->exists($user->avatar)) {
+                \Storage::disk('public')->delete($user->avatar);
+            }
+
+            $avatarPath = $request->file('new_avatar')->store('avatars', 'public');
+            $updateData['avatar'] = $avatarPath;
+        }
+
+        $user->update($updateData);
 
         return redirect()->back()->with('success', 'User updated successfully.');
     }

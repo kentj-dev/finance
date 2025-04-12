@@ -27,6 +27,7 @@ interface DashboardProps {
 
 type RegisterForm = {
     name: string;
+    avatar: File | null;
     email: string;
     password: string;
     password_confirmation: string;
@@ -40,6 +41,7 @@ export default function Dashboard({ users, filters }: DashboardProps) {
 
     const { data, setData, post, processing, errors, reset } = useForm<Required<RegisterForm>>({
         name: '',
+        avatar: null,
         email: '',
         password: '',
         password_confirmation: '',
@@ -96,7 +98,7 @@ export default function Dashboard({ users, filters }: DashboardProps) {
                 {users.length > 0 ? (
                     <div className="grid gap-2">
                         {users.map((user) => (
-                            <UserList user={user} auth={auth}/>
+                            <UserList user={user} auth={auth} key={user.name}/>
                         ))}
                     </div>
                 ) : (
@@ -130,6 +132,18 @@ export default function Dashboard({ users, filters }: DashboardProps) {
                                         placeholder="Full name"
                                     />
                                     <InputError message={errors.name} className="mt-2" />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="avatar">Avatar</Label>
+                                    <Input
+                                        id="avatar"
+                                        type="file"
+                                        accept="image/*"
+                                        tabIndex={1}
+                                        onChange={(e) => setData('avatar', e.target.files?.[0] || null)}
+                                        disabled={processing}
+                                    />
+                                    <InputError message={errors.avatar} />
                                 </div>
                                 <div className="grid gap-2">
                                     <Label htmlFor="email">Email address</Label>

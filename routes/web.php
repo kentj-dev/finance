@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\DashboardController;
 
+// * if dealing with files, use post method even in updating.
+
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
@@ -22,7 +24,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('dashboard/delete-user/{id}', [DashboardController::class, 'deleteUser'])
         ->name('dashboard.delete-user');
 
-    Route::put('dashboard/update-user/{id}', [DashboardController::class, 'updateUser'])
+    Route::post('dashboard/update-user/{id}', [DashboardController::class, 'updateUser'])
         ->name('dashboard.update-user');
 });
 

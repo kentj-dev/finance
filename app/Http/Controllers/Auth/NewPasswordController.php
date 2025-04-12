@@ -13,17 +13,28 @@ use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Facades\DB;
 
 class NewPasswordController extends Controller
 {
     /**
      * Show the password reset page.
      */
-    public function create(Request $request): Response
+    public function create(Request $request)
     {
+        $email = $request->email;
+        $record = DB::table('password_reset_tokens')->where('email', $email)->first();
+        $token = $request->route('token');
+
+        if (!$record || !Hash::check($token, $record->token)) {
+            return to_route('password.request')->with([
+                'token_errors' => 'This password reset link is invalid or has already been used.',
+            ]);
+        }
+
         return Inertia::render('auth/reset-password', [
-            'email' => $request->email,
-            'token' => $request->route('token'),
+            'email' => $email,
+            'token' => $token,
         ]);
     }
 
