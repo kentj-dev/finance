@@ -2,7 +2,7 @@ import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useInitials } from '@/hooks/use-initials';
@@ -166,34 +166,33 @@ const ViewUser: React.FC<ViewUserProps> = ({ user }) => {
                     </form>
                 </div>
             </div>
-            {showCropModal && (
-                <Dialog open={showCropModal} onOpenChange={setShowCropModal}>
-                    <DialogContent className="sm:max-w-[600px]">
-                        <DialogHeader>
-                            <DialogTitle>Crop Image</DialogTitle>
-                        </DialogHeader>
 
-                        <div className="relative h-[300px] w-full bg-black">
-                            <Cropper
-                                image={imageSrc!}
-                                crop={crop}
-                                zoom={zoom}
-                                aspect={1}
-                                onCropChange={setCrop}
-                                onZoomChange={setZoom}
-                                onCropComplete={onCropComplete}
-                            />
-                        </div>
+            <Dialog open={showCropModal} onOpenChange={setShowCropModal}>
+                <DialogContent className="sm:max-w-[600px]">
+                    <DialogHeader>
+                        <DialogTitle>Crop Image</DialogTitle>
+                        <DialogDescription>Adjust the crop area to select the part of the image you want to keep.</DialogDescription>
+                    </DialogHeader>
+                    <div className="relative h-[300px] w-full bg-black rounded-lg overflow-hidden">
+                        <Cropper
+                            image={imageSrc!}
+                            crop={crop}
+                            zoom={zoom}
+                            aspect={1}
+                            onCropChange={setCrop}
+                            onZoomChange={setZoom}
+                            onCropComplete={onCropComplete}
+                        />
+                    </div>
 
-                        <DialogFooter className="mt-4">
-                            <Button onClick={handleCropDone}>Crop</Button>
-                            <Button variant="ghost" onClick={() => setShowCropModal(false)}>
-                                Cancel
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-            )}
+                    <DialogFooter className="mt-4">
+                        <Button onClick={handleCropDone}>Crop Image</Button>
+                        <Button variant="outline" onClick={() => setShowCropModal(false)}>
+                            Cancel
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </AppLayout>
     );
 };
