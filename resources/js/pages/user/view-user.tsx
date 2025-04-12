@@ -173,7 +173,7 @@ const ViewUser: React.FC<ViewUserProps> = ({ user }) => {
                         <DialogTitle>Crop Image</DialogTitle>
                         <DialogDescription>Adjust the crop area to select the part of the image you want to keep.</DialogDescription>
                     </DialogHeader>
-                    <div className="relative h-[300px] w-full bg-black rounded-lg overflow-hidden">
+                    <div className="relative h-[300px] w-full overflow-hidden rounded-lg bg-black">
                         <Cropper
                             image={imageSrc!}
                             crop={crop}

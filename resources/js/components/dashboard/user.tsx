@@ -24,7 +24,7 @@ export function UserList({ user, auth }: { user: User; auth: Auth }) {
         <div key={user.id} className="rounded-md border p-4">
             <div className="flex items-center gap-2">
                 <Avatar>
-                    <AvatarImage src={`/storage/${user.avatar}`} alt={user.name} />
+                    {user.avatar && <AvatarImage src={`/storage/${user.avatar}`} alt={user.name} />}
                     <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                 </Avatar>
                 <h2 className="text-lg font-semibold">{user.name}</h2>

@@ -90,6 +90,7 @@ export default function Dashboard({ users, filters }: DashboardProps) {
             <div className="p-4">
                 <input
                     type="text"
+                    name='search'
                     placeholder="Search user"
                     className="mb-2 rounded-lg border px-2 py-2 text-sm focus:outline-none"
                     value={searchParam}
