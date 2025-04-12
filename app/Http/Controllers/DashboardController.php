@@ -20,32 +20,51 @@ class DashboardController extends Controller
     {
         $search = $request->query('search');
         $filters = $request->query('filters');
-    
+        $sortBy = $request->query('sortBy');
+        $sortDirection = $request->query('sortDirection');
+
         $filterValues = array_filter(explode(',', $filters ?? ''));
-    
+
         $allUsers = User::query()
             ->when(in_array('verified', $filterValues), function ($query) {
                 $query->whereNotNull('email_verified_at');
             })
             ->when($search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%");
-                });
+                if (str_starts_with($search, '!') && strlen($search) > 1) {
+                    $term = ltrim($search, '!');
+                    $query->where(function ($q) use ($term) {
+                        $q->where('name', 'not like', "%{$term}%")
+                            ->where('email', 'not like', "%{$term}%");
+                    });
+                } else {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    });
+                }
             })
-            ->orderBy('created_at', 'desc')
+            ->when(in_array($sortBy, ['id', 'name', 'email']) && in_array($sortDirection, ['asc', 'desc']), function ($query) use ($sortBy, $sortDirection) {
+                $query->orderBy($sortBy, $sortDirection);
+            }, function ($query) {
+                $query->orderBy('created_at', 'desc');
+            })
             ->paginate(5)
             ->withQueryString();
-    
+
+        $allUsersCount = User::count();
+
         return Inertia::render('dashboard', [
             'users' => $allUsers,
             'filters' => [
                 'search' => $search,
                 'filters' => explode(',', $filters ?? ''),
+                'sort' => $sortBy,
+                'direction' => $sortDirection,
             ],
+            'allUsersCount' => $allUsersCount,
         ]);
     }
-    
+
     public function createUser(Request $request): RedirectResponse
     {
         $request->validate([

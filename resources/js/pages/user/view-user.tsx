@@ -15,6 +15,7 @@ import { Dialog } from '@radix-ui/react-dialog';
 import { FormEventHandler, useCallback, useRef, useState } from 'react';
 import Cropper, { Area } from 'react-easy-crop';
 import { toast } from 'sonner';
+import { formatDateFull } from '@/utils/dateHelper';
 
 interface ViewUserProps {
     user: User;
@@ -101,9 +102,17 @@ const ViewUser: React.FC<ViewUserProps> = ({ user }) => {
 
         toast.promise(promise, {
             loading: 'Updating user...',
-            success: 'User updated!',
+            success: 'User updated successfuly!',
             error: 'Failed to update user.',
+            description: formatDateFull(new Date()),
+            descriptionClassName: '!text-gray-500',
             duration: 5000,
+            classNames: {
+                success: '!text-green-700',
+                error: '!text-red-700',
+                loading: '!text-blue-700',
+            },
+            position: 'top-right',
         });
     };
 
