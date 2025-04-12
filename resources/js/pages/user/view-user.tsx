@@ -2,7 +2,7 @@ import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useInitials } from '@/hooks/use-initials';
@@ -113,10 +113,24 @@ const ViewUser: React.FC<ViewUserProps> = ({ user }) => {
             <div className="px-4 py-6">
                 <Heading title="View User" description={`User #${user.name}`} />
                 <div className="flex h-full flex-1 flex-col gap-4 rounded-xl">
-                    <Avatar className="size-16 rounded-md">
-                        <AvatarImage src={`/storage/${user.avatar}`} alt={user.name} className="object-cover" />
-                        <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-                    </Avatar>
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Avatar className="size-20 cursor-pointer rounded-md">
+                                {user.avatar && <AvatarImage src={`/storage/${user.avatar}`} alt={user.name} className="object-cover" />}
+                                <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                            </Avatar>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                                <DialogTitle>{user.name}</DialogTitle>
+                                <DialogDescription>{user.email}</DialogDescription>
+                            </DialogHeader>
+                            <Avatar className="size-full rounded-md">
+                                {user.avatar && <AvatarImage src={`/storage/${user.avatar}`} alt={user.name} className="object-cover" />}
+                                <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                            </Avatar>
+                        </DialogContent>
+                    </Dialog>
                     <form onSubmit={updateUser}>
                         <Label htmlFor="name">Name</Label>
                         <Input

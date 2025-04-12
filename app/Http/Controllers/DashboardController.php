@@ -19,25 +19,33 @@ class DashboardController extends Controller
     public function create(Request $request): Response
     {
         $search = $request->query('search');
-
+        $filters = $request->query('filters');
+    
+        $filterValues = array_filter(explode(',', $filters ?? ''));
+    
         $allUsers = User::query()
-            ->when($search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
+            ->when(in_array('verified', $filterValues), function ($query) {
+                $query->whereNotNull('email_verified_at');
             })
-            ->orderBy("created_at", "desc")
-            ->get();
-
-        $context = [
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(5)
+            ->withQueryString();
+    
+        return Inertia::render('dashboard', [
             'users' => $allUsers,
             'filters' => [
                 'search' => $search,
-            ]
-        ];
-
-        return Inertia::render('dashboard', $context);
+                'filters' => explode(',', $filters ?? ''),
+            ],
+        ]);
     }
-
+    
     public function createUser(Request $request): RedirectResponse
     {
         $request->validate([

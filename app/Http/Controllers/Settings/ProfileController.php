@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Validation\Rule;
+use App\Models\User;
 
 class ProfileController extends Controller
 {
@@ -19,7 +21,7 @@ class ProfileController extends Controller
     public function edit(Request $request): Response
     {
         return Inertia::render('settings/profile', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
+            'mustVerifyEmail' => !$request->user()->hasVerifiedEmail(),
             'status' => $request->session()->get('status'),
         ]);
     }
@@ -29,15 +31,43 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $id = $request->route('id');
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $validated = $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('users')->ignore($id),
+            ],
+            'new_avatar' => 'nullable|image|max:2048',
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('users')->ignore($id),
+            ],
+        ]);
+
+        $user = User::findOrFail($id);
+
+        $updateData = [
+            'name' => $request->name,
+            'email' => $request->email,
+        ];
+
+        if ($request->hasFile('new_avatar')) {
+            if ($user->avatar && \Storage::disk('public')->exists($user->avatar)) {
+                \Storage::disk('public')->delete($user->avatar);
+            }
+
+            $avatarPath = $request->file('new_avatar')->store('avatars', 'public');
+            $updateData['avatar'] = $avatarPath;
         }
 
-        $request->user()->save();
+        $user->update($updateData);
 
-        return to_route('profile.edit');
+        return redirect()->back()->with('success', 'User updated successfully.');
     }
 
     /**
