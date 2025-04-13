@@ -2,7 +2,7 @@ import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Icon } from '@/components/icon';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList, navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -11,7 +11,7 @@ import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-react';
+import { BookOpen, ChevronDown, Code, CodeXml, Folder, LayoutGrid, Menu, Pi, Search } from 'lucide-react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 
@@ -20,6 +20,35 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: '/dashboard',
         icon: LayoutGrid,
+        routes: ['/dashboard', '/view-user'],
+    },
+    {
+        title: 'Programs',
+        href: '#',
+        icon: Pi,
+        subItems: [
+            {
+                title: 'Programs 1',
+                href: '/settings/profile',
+                icon: Pi,
+            },
+            {
+                title: 'Programs 2',
+                href: '#',
+                icon: Pi,
+            },
+        ],
+    },
+
+    {
+        title: 'Route 1',
+        href: '#',
+        icon: Code,
+    },
+    {
+        title: 'Route 2',
+        href: '#',
+        icon: CodeXml,
     },
 ];
 
@@ -104,19 +133,44 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                             <NavigationMenuList className="flex h-full items-stretch space-x-2">
                                 {mainNavItems.map((item, index) => (
                                     <NavigationMenuItem key={index} className="relative flex h-full items-center">
-                                        <Link
-                                            href={item.href}
-                                            className={cn(
-                                                navigationMenuTriggerStyle(),
-                                                page.url === item.href && activeItemStyles,
-                                                'h-9 cursor-pointer px-3',
-                                            )}
-                                        >
-                                            {item.icon && <Icon iconNode={item.icon} className="mr-2 h-4 w-4" />}
-                                            {item.title}
-                                        </Link>
-                                        {page.url === item.href && (
-                                            <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"></div>
+                                        {item.subItems ? (
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button
+                                                        variant="ghost"
+                                                        className={cn(
+                                                            navigationMenuTriggerStyle(),
+                                                            'h-9 px-3 font-normal',
+                                                            page.url === item.href && activeItemStyles,
+                                                        )}
+                                                    >
+                                                        {item.icon && <Icon iconNode={item.icon} className="mr-2 h-4 w-4" />}
+                                                        {item.title} <ChevronDown className="ml-1 h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent className="w-48">
+                                                    {item.subItems.map((subItem) => (
+                                                        <DropdownMenuItem asChild key={subItem.title}>
+                                                            <Link href={subItem.href} className="flex items-center space-x-2 text-sm">
+                                                                {subItem.icon && <Icon iconNode={subItem.icon} className="h-4 w-4" />}
+                                                                <span>{subItem.title}</span>
+                                                            </Link>
+                                                        </DropdownMenuItem>
+                                                    ))}
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        ) : (
+                                            <Link
+                                                href={item.href}
+                                                className={cn(
+                                                    navigationMenuTriggerStyle(),
+                                                    page.url === item.href && activeItemStyles,
+                                                    'h-9 cursor-pointer px-3',
+                                                )}
+                                            >
+                                                {item.icon && <Icon iconNode={item.icon} className="mr-2 h-4 w-4" />}
+                                                {item.title}
+                                            </Link>
                                         )}
                                     </NavigationMenuItem>
                                 ))}

@@ -13,13 +13,13 @@ interface InertiaPaginateProps {
 export const InertiaPaginate: React.FC<InertiaPaginateProps> = ({ currentPage, lastPage, baseRoute, query = {} }) => {
     const handlePageChange = ({ selected }: { selected: number }) => {
         const page = selected + 1;
-
+       
         const params = cleanQueryObject({
             page: page > 1 ? page : undefined,
             ...query,
         });
 
-        router.get(baseRoute, Object.keys(params).length ? params : undefined, {
+        router.get(route(baseRoute), Object.keys(params).length ? params : undefined, {
             preserveScroll: true,
             preserveState: true,
         });

@@ -13,16 +13,26 @@ use Illuminate\Validation\Rules;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use Inertia\Response as InertiaResponse;
 
 class DashboardController extends Controller
 {
-    public function create(Request $request): Response
+    public function create(Request $request): InertiaResponse|RedirectResponse
     {
+        $page = (int) $request->get("page", 1);
         $search = $request->query('search');
         $filters = $request->query('filters');
         $sortBy = $request->query('sortBy');
         $sortDirection = $request->query('sortDirection');
 
+        $perPagesDropdown = [5, 10, 25, 50, 100];
+
+        $perPage = (int) $request->query('perPage', $perPagesDropdown[0]);
+        
+        if (!in_array($perPage, $perPagesDropdown)) {
+            $perPage = array_key_first($perPagesDropdown);
+        }
+        
         $filterValues = array_filter(explode(',', $filters ?? ''));
 
         $allUsers = User::query()
@@ -48,18 +58,28 @@ class DashboardController extends Controller
             }, function ($query) {
                 $query->orderBy('created_at', 'desc');
             })
-            ->paginate(5)
+            ->paginate($perPage)
             ->withQueryString();
+            
+        if ($page > $allUsers->lastPage()) {
+            return redirect()->route('dashboard', array_merge(
+                $request->except(keys: 'page'),
+                ['page' => 1]
+            ));
+        }
 
         $allUsersCount = User::count();
 
         return Inertia::render('dashboard', [
             'users' => $allUsers,
-            'filters' => [
+            'tableData' => [
                 'search' => $search,
                 'filters' => explode(',', $filters ?? ''),
                 'sort' => $sortBy,
                 'direction' => $sortDirection,
+                'page' => $page,
+                'perPage' => $perPage,
+                'perPagesDropdown' => $perPagesDropdown,
             ],
             'allUsersCount' => $allUsersCount,
         ]);
