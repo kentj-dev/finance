@@ -41,6 +41,12 @@ type DataTableProps<T extends { id: number }> = {
     /** The dataset to render as rows */
     data: T[];
 
+    /** Custom data rendering for specific columns, if any */
+    customData?: {
+        key: string;
+        render: (item: T) => React.ReactNode;
+    }[];
+
     /** Total number of data not-paginated */
     dataCount?: number;
 
@@ -119,6 +125,7 @@ type DataTableProps<T extends { id: number }> = {
 export function DataTable<T extends { id: number }>({
     headers,
     data,
+    customData = [],
     dataCount = 0,
     baseRoute = 'dashboard',
 
@@ -157,7 +164,11 @@ export function DataTable<T extends { id: number }>({
     const [perPage, setPerPage] = useState(defaultPerPage || 5);
 
     const toggleSelectAll = (checked: boolean) => {
-        setSelectedItems(checked ? data : []);
+        setSelectedItems((prev) => {
+            const currentPageIds = data.map((item) => item.id);
+            const existing = prev.filter((item) => !currentPageIds.includes(item.id));
+            return checked ? [...existing, ...data] : existing;
+        });
     };
 
     const toggleSelectOne = (item: T) => {
@@ -205,9 +216,11 @@ export function DataTable<T extends { id: number }>({
         return () => clearTimeout(delayDebounce);
     }, [baseRoute, perPage, perPagesDropdown, searchParam, selectedFilters, selectedSort, sortDirection]);
 
-    const allSelected = dataCount > 0 && selectedItems.length === dataCount;
-    const partiallySelected = selectedItems.length > 0 && selectedItems.length < dataCount;
-
+    const pageIds = data.map((item) => item.id);
+    const selectedIds = selectedItems.map((item) => item.id);
+    const allSelected = pageIds.every((id) => selectedIds.includes(id));
+    const partiallySelected = pageIds.some((id) => selectedIds.includes(id)) && !allSelected;
+    
     const getCheckedState = (): CheckedState => {
         if (allSelected) return true;
         if (partiallySelected) return 'indeterminate';
@@ -250,7 +263,7 @@ export function DataTable<T extends { id: number }>({
                         )}
                     </div>
 
-                    <div className="flex w-full flex-wrap justify-start md:justify-end gap-3">
+                    <div className="flex w-full flex-wrap justify-start gap-3 md:justify-end">
                         <ListFilter size={16} />
                         {filters.map(({ key, label }) => (
                             <div key={key} className="flex items-center space-x-2">
@@ -324,11 +337,14 @@ export function DataTable<T extends { id: number }>({
                                             </TableCell>
                                         )}
 
-                                        {headers.map(({ key }) => (
-                                            <TableCell key={key} className="align-middle">
-                                                {String(item[key as keyof T] ?? '')}
-                                            </TableCell>
-                                        ))}
+                                        {headers.map(({ key }) => {
+                                            const custom = customData?.find((c) => c.key === key);
+                                            return (
+                                                <TableCell key={key} className="align-middle">
+                                                    {custom ? custom.render(item) : String(item[key as keyof T] ?? '')}
+                                                </TableCell>
+                                            );
+                                        })}
 
                                         {actions && (
                                             <TableCell className="align-middle">

@@ -1,12 +1,15 @@
 import { DataTable } from '@/components/helpers/DataTable';
 import InputError from '@/components/input-error';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useInitials } from '@/hooks/use-initials';
 import AppLayout from '@/layouts/app-layout';
 import { SharedData, User, type BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { format } from 'date-fns';
 import { ExternalLink, LoaderCircle, Plus, Trash2 } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
 import { toast } from 'sonner';
@@ -49,8 +52,8 @@ type RegisterForm = {
 };
 
 export default function Dashboard({ users, tableData, allUsersCount }: DashboardProps) {
-
     const { auth } = usePage<SharedData>().props;
+    const getInitials = useInitials();
 
     const [open, setOpen] = useState(false);
 
@@ -190,6 +193,7 @@ export default function Dashboard({ users, tableData, allUsersCount }: Dashboard
                     </div>
                 </div>
                 <DataTable
+                    showDebugPreview={false}
                     enableSearch
                     searchDefaultValue={tableData.search}
                     enableSelect
@@ -199,9 +203,36 @@ export default function Dashboard({ users, tableData, allUsersCount }: Dashboard
                         { key: 'email', label: 'Email' },
                         { key: 'created_at', label: 'Created At' },
                         { key: 'updated_at', label: 'Updated At' },
-
                     ]}
                     data={users.data}
+                    customData={[
+                        {
+                            key: 'name',
+                            render: (user) => (
+                                <div className="flex items-center gap-2">
+                                    <Avatar>
+                                        {user.avatar && (
+                                            <AvatarImage
+                                                src={`/storage/${user.avatar}`}
+                                                alt={user.name}
+                                                className="size-8 rounded-full object-cover"
+                                            />
+                                        )}
+                                        <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                                    </Avatar>
+                                    <span>{user.name}</span>
+                                </div>
+                            ),
+                        },
+                        {
+                            key: 'created_at',
+                            render: (user) => <span>{format(new Date(user.created_at), 'MMMM d, yyyy h:mm a')}</span>,
+                        },
+                        {
+                            key: 'updated_at',
+                            render: (user) => <span>{format(new Date(user.updated_at), 'MMMM d, yyyy h:mm a')}</span>,
+                        },
+                    ]}
                     dataCount={allUsersCount}
                     filters={[
                         { key: 'verified', label: 'Verified' },
