@@ -70,7 +70,7 @@ class DashboardController extends Controller
 
         $allUsersCount = User::count();
 
-        return Inertia::render('dashboard', [
+        $context = [
             'users' => $allUsers,
             'tableData' => [
                 'search' => $search,
@@ -82,7 +82,9 @@ class DashboardController extends Controller
                 'perPagesDropdown' => $perPagesDropdown,
             ],
             'allUsersCount' => $allUsersCount,
-        ]);
+        ];
+
+        return Inertia::render('dashboard', $context);
     }
 
     public function createUser(Request $request): RedirectResponse

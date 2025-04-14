@@ -32,6 +32,12 @@ class PasswordResetLinkController extends Controller
         $request->validate([
             'email' => 'required|email',
         ]);
+        
+        if (auth()->check() && auth()->user()->email === $request->email) {
+            auth()->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
 
         Password::sendResetLink(
             $request->only('email')

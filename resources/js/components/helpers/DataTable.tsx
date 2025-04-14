@@ -44,7 +44,7 @@ type DataTableProps<T extends { id: number }> = {
     /** Custom data rendering for specific columns, if any */
     customData?: {
         key: string;
-        render: (item: T) => React.ReactNode;
+        render: (item: T, index: number) => React.ReactNode;
     }[];
 
     /** Total number of data not-paginated */
@@ -119,9 +119,17 @@ type DataTableProps<T extends { id: number }> = {
     /** Default items per page, defaults to the first item in the dropdown */
     defaultPerPage?: number;
 
+    /** Class name for the pagination component */
     showDebugPreview?: boolean;
+
+    /** Enable or disable index column (e.g., for row numbers) */
+    enableIndex?: boolean;
+
+    /** You can get this from Laravel pagination meta data. This is useful for pagination where the first item is not always 1. */
+    indexFrom?: number;
 };
 
+/** A reusable data table component for displaying and managing tabular data with features like sorting, searching, filtering, and pagination. */
 export function DataTable<T extends { id: number }>({
     headers,
     data,
@@ -155,6 +163,9 @@ export function DataTable<T extends { id: number }>({
     defaultPerPage = 5,
 
     showDebugPreview = false,
+
+    enableIndex = false,
+    indexFrom = 1,
 }: DataTableProps<T>) {
     const [selectedSort, setSelectedSort] = useState(defaultSort || '');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(defaultSortDirection || '');
@@ -162,7 +173,7 @@ export function DataTable<T extends { id: number }>({
     const [selectedItems, setSelectedItems] = useState<T[]>([]);
     const [selectedFilters, setSelectedFilters] = useState<string[]>(defaultFilters || []);
     const [perPage, setPerPage] = useState(defaultPerPage || 5);
-
+    console.log(data);
     const toggleSelectAll = (checked: boolean) => {
         setSelectedItems((prev) => {
             const currentPageIds = data.map((item) => item.id);
@@ -220,7 +231,7 @@ export function DataTable<T extends { id: number }>({
     const selectedIds = selectedItems.map((item) => item.id);
     const allSelected = pageIds.every((id) => selectedIds.includes(id));
     const partiallySelected = pageIds.some((id) => selectedIds.includes(id)) && !allSelected;
-    
+
     const getCheckedState = (): CheckedState => {
         if (allSelected) return true;
         if (partiallySelected) return 'indeterminate';
@@ -295,6 +306,9 @@ export function DataTable<T extends { id: number }>({
                                         <Checkbox id="select-all" checked={getCheckedState()} onCheckedChange={toggleSelectAll} />
                                     </TableHead>
                                 )}
+
+                                {enableIndex && <TableHead className="w-10 text-center">#</TableHead>}
+
                                 {headers.map(({ key, label }) => (
                                     <TableHead
                                         key={key}
@@ -326,7 +340,7 @@ export function DataTable<T extends { id: number }>({
 
                         <TableBody>
                             {data.length > 0 ? (
-                                data.map((item) => (
+                                data.map((item, index) => (
                                     <TableRow key={item.id} className="font-[400] odd:bg-white even:bg-gray-50">
                                         {enableSelect && (
                                             <TableCell className="text-center">
@@ -337,11 +351,17 @@ export function DataTable<T extends { id: number }>({
                                             </TableCell>
                                         )}
 
+                                        {enableIndex && (
+                                            <TableCell className="text-center">
+                                                <span>{indexFrom + index}</span>
+                                            </TableCell>
+                                        )}
+
                                         {headers.map(({ key }) => {
                                             const custom = customData?.find((c) => c.key === key);
                                             return (
                                                 <TableCell key={key} className="align-middle">
-                                                    {custom ? custom.render(item) : String(item[key as keyof T] ?? '')}
+                                                    {custom ? custom.render(item, index) : String(item[key as keyof T] ?? '')}
                                                 </TableCell>
                                             );
                                         })}

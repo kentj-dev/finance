@@ -10,7 +10,7 @@ import AppLayout from '@/layouts/app-layout';
 import { SharedData, User, type BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { format } from 'date-fns';
-import { ExternalLink, LoaderCircle, Plus, Trash2 } from 'lucide-react';
+import { ExternalLink, KeyRound, LoaderCircle, Plus, Trash2 } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -31,6 +31,7 @@ interface DashboardProps {
             label: string;
             active: boolean;
         }[];
+        from: number;
     };
     tableData: {
         search: string;
@@ -101,6 +102,7 @@ export default function Dashboard({ users, tableData, allUsersCount }: Dashboard
             });
         }
     };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
@@ -188,21 +190,25 @@ export default function Dashboard({ users, tableData, allUsersCount }: Dashboard
                                         </Button>
                                     </DialogFooter>
                                 </form>
+                                <span className="flex items-center justify-center gap-2 text-sm font-medium text-red-700">
+                                    <KeyRound size={16} />
+                                    <div>The user is required to change their password upon first login.</div>
+                                </span>
                             </DialogContent>
                         </Dialog>
                     </div>
                 </div>
                 <DataTable
-                    showDebugPreview={false}
+                    showDebugPreview={true}
                     enableSearch
                     searchDefaultValue={tableData.search}
                     enableSelect
+                    enableIndex
+                    indexFrom={users.from}
                     headers={[
-                        { key: 'id', label: '#' },
                         { key: 'name', label: 'Name' },
                         { key: 'email', label: 'Email' },
-                        { key: 'created_at', label: 'Created At' },
-                        { key: 'updated_at', label: 'Updated At' },
+                        { key: 'activated_at', label: 'Activated At' },
                     ]}
                     data={users.data}
                     customData={[
@@ -225,12 +231,13 @@ export default function Dashboard({ users, tableData, allUsersCount }: Dashboard
                             ),
                         },
                         {
-                            key: 'created_at',
-                            render: (user) => <span>{format(new Date(user.created_at), 'MMMM d, yyyy h:mm a')}</span>,
-                        },
-                        {
-                            key: 'updated_at',
-                            render: (user) => <span>{format(new Date(user.updated_at), 'MMMM d, yyyy h:mm a')}</span>,
+                            key: 'activated_at',
+                            render: (user) =>
+                                user.activated_at ? (
+                                    <span>{format(new Date(user.activated_at), 'MMMM d, yyyy h:mm a')}</span>
+                                ) : (
+                                    <span className="text-gray-500">Not activated</span>
+                                ),
                         },
                     ]}
                     dataCount={allUsersCount}

@@ -9,13 +9,13 @@ import { useInitials } from '@/hooks/use-initials';
 import AppLayout from '@/layouts/app-layout';
 import { User, type BreadcrumbItem } from '@/types';
 import getCroppedImg from '@/utils/cropImage';
+import { formatDateFull } from '@/utils/dateHelper';
 import { Transition } from '@headlessui/react';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { Dialog } from '@radix-ui/react-dialog';
 import { FormEventHandler, useCallback, useRef, useState } from 'react';
 import Cropper, { Area } from 'react-easy-crop';
 import { toast } from 'sonner';
-import { formatDateFull } from '@/utils/dateHelper';
 
 interface ViewUserProps {
     user: User;
@@ -140,34 +140,60 @@ const ViewUser: React.FC<ViewUserProps> = ({ user }) => {
                             </Avatar>
                         </DialogContent>
                     </Dialog>
-                    <form onSubmit={updateUser}>
-                        <Label htmlFor="name">Name</Label>
-                        <Input
-                            type="text"
-                            id="name"
-                            name="name"
-                            value={data.name}
-                            placeholder="Name"
-                            className="mb-4"
-                            required
-                            onChange={(e) => setData('name', e.target.value)}
-                        />
-                        <InputError message={errors.name} />
-                        <Label htmlFor="avatar">New Avatar</Label>
-                        <Input type="file" id="avatar" name="avatar" accept="image/*" className="mb-4" onChange={onFileChange} ref={inputFileRef} />
-                        <InputError message={errors.new_avatar} />
-                        <Label htmlFor="email">Email</Label>
-                        <Input
-                            type="email"
-                            id="email"
-                            name="email"
-                            value={data.email}
-                            placeholder="Email"
-                            className="mb-4"
-                            required
-                            onChange={(e) => setData('email', e.target.value)}
-                        />
-                        <InputError message={errors.email} />
+                    <form onSubmit={updateUser} className="flex flex-col gap-4">
+                        <div>
+                            <Label htmlFor="name">Name</Label>
+                            <Input
+                                type="text"
+                                id="name"
+                                name="name"
+                                value={data.name}
+                                placeholder="Name"
+                                required
+                                onChange={(e) => setData('name', e.target.value)}
+                            />
+                            <InputError message={errors.name} />
+                        </div>
+                        <div>
+                            <Label htmlFor="avatar">New Avatar</Label>
+                            <Input type="file" id="avatar" name="avatar" accept="image/*" onChange={onFileChange} ref={inputFileRef} />
+                            <InputError message={errors.new_avatar} />
+                        </div>
+                        <div>
+                            <Label htmlFor="email">Email</Label>
+                            <Input
+                                type="email"
+                                id="email"
+                                name="email"
+                                value={data.email}
+                                placeholder="Email"
+                                required
+                                onChange={(e) => setData('email', e.target.value)}
+                            />
+                            <InputError message={errors.email} />
+                            <button
+                                className="cursor-pointer text-sm text-blue-500"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    const promise = new Promise<void>((resolve, reject) => {
+                                        router.post(
+                                            route('password.email'),
+                                            { email: user.email },
+                                            { preserveScroll: true, onSuccess: () => resolve(), onError: () => reject() },
+                                        );
+                                    });
+
+                                    toast.promise(promise, {
+                                        loading: 'Sending password reset link...',
+                                        success: 'Password reset link sent!',
+                                        error: 'Failed to send password reset link.',
+                                        duration: 5000,
+                                    });
+                                }}
+                            >
+                                Send password reset link
+                            </button>
+                        </div>
                         <div className="flex items-center gap-2">
                             <button
                                 type="submit"
