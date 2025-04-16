@@ -60,7 +60,7 @@ type AddModuleForm = {
 export default function Modules({ modules, tableData, allModulesCount }: ModulesProps) {
     const [openAddModal, setOpenAddModal] = useState(false);
 
-    const { data, setData, post, processing, errors } = useForm<Required<AddModuleForm>>({
+    const { data, setData, post, processing, errors, reset } = useForm<Required<AddModuleForm>>({
         name: '',
         description: '',
     });
@@ -85,6 +85,7 @@ export default function Modules({ modules, tableData, allModulesCount }: Modules
             post(route('modules.add-module'), {
                 preserveScroll: true,
                 onSuccess: () => {
+                    reset();
                     resolve();
                     setOpenAddModal(false);
                 },

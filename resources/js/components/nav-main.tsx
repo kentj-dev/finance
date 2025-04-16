@@ -27,7 +27,7 @@ export function NavMain({ items = [] }: { items: NavGroup[] }) {
 
     return items
         .filter(
-            (group) => group.items.some((item) => isModuleAccessible(item.title)), // hide group if all items are blocked
+            (group) => group.items.some((item) => isModuleAccessible(item.title)),
         )
         .map((items) => (
             <SidebarGroup key={items.title}>

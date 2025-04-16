@@ -78,6 +78,7 @@ export default function Users({ users, tableData, allUsersCount }: UsersProps) {
                     resolve();
                 },
                 onError: () => {
+                    reset('password', 'password_confirmation');
                     reject();
                 },
             });

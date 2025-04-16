@@ -67,7 +67,7 @@ export default function Roles({ roles, tableData, allRolesCount }: RoleProps) {
 
     const [openAddModal, setOpenAddModal] = useState(false);
 
-    const { data, setData, post, processing, errors } = useForm<Required<AddRoleForm>>({
+    const { data, setData, post, processing, errors, reset } = useForm<Required<AddRoleForm>>({
         name: '',
         description: '',
     });
@@ -99,6 +99,7 @@ export default function Roles({ roles, tableData, allRolesCount }: RoleProps) {
             post(route('roles.add-role'), {
                 preserveScroll: true,
                 onSuccess: () => {
+                    reset();
                     resolve();
                     setOpenAddModal(false);
                 },
