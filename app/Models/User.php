@@ -28,6 +28,7 @@ class User extends Authenticatable
         'email',
         'password',
         'activated_at',
+        'superstaff',
     ];
 
     /**
