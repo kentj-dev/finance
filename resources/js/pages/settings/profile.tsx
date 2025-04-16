@@ -1,23 +1,22 @@
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { FormEventHandler, useCallback, useRef, useState } from 'react';
+import { FormEventHandler, useRef, useState } from 'react';
 
 import DeleteUser from '@/components/delete-user';
 import HeadingSmall from '@/components/heading-small';
+import CropDialog from '@/components/helpers/CropDialog';
 import InputError from '@/components/input-error';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useInitials } from '@/hooks/use-initials';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
-import getCroppedImg from '@/utils/cropImage';
-import Cropper, { Area } from 'react-easy-crop';
 import { toast } from 'sonner';
-import { Checkbox } from '@/components/ui/checkbox';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -52,8 +51,6 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                 onSuccess: () => {
                     reset('new_avatar');
                     resolve();
-                    setCrop({ x: 0, y: 0 });
-                    setZoom(1);
                     inputFileRef.current!.value = '';
                 },
                 onError: () => {
@@ -71,13 +68,10 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
     };
 
     const [imageSrc, setImageSrc] = useState<string | null>(null);
-    const [crop, setCrop] = useState({ x: 0, y: 0 });
-    const [zoom, setZoom] = useState(1);
-    const [croppedAreaPixels, setCroppedAreaPixels] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
-    const inputFileRef = useRef<HTMLInputElement | null>(null);
+    const inputFileRef = useRef<HTMLInputElement>(null);
     const [showCropModal, setShowCropModal] = useState(false);
 
-    const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
@@ -89,21 +83,8 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
         reader.readAsDataURL(file);
     };
 
-    const onCropComplete = useCallback((_: Area, croppedPixels: { x: number; y: number; width: number; height: number }) => {
-        setCroppedAreaPixels(croppedPixels);
-    }, []);
-
-    const handleCropDone = async () => {
-        if (!imageSrc || !croppedAreaPixels) return;
-
-        const croppedBlob = await getCroppedImg(imageSrc, croppedAreaPixels);
-        const croppedFile = new File([croppedBlob], 'cropped-avatar.jpg', {
-            type: 'image/jpeg',
-        });
-
-        setData('new_avatar', croppedFile);
-        setData('remove_avatar', false);
-        setShowCropModal(false);
+    const handleCropped = (file: File) => {
+        setData('new_avatar', file);
     };
 
     return (
@@ -145,7 +126,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                     setData('remove_avatar', e as boolean);
                                     setData('new_avatar', null);
                                     inputFileRef.current!.value = '';
-                                }} 
+                                }}
                             />
                             <label
                                 htmlFor="verified"
@@ -236,32 +217,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
                 <DeleteUser />
             </SettingsLayout>
-            <Dialog open={showCropModal} onOpenChange={setShowCropModal}>
-                <DialogContent className="sm:max-w-[600px]">
-                    <DialogHeader>
-                        <DialogTitle>Crop Image</DialogTitle>
-                        <DialogDescription>Adjust the crop area to select the part of the image you want to keep.</DialogDescription>
-                    </DialogHeader>
-                    <div className="relative h-[300px] w-full overflow-hidden rounded-lg bg-black">
-                        <Cropper
-                            image={imageSrc!}
-                            crop={crop}
-                            zoom={zoom}
-                            aspect={1}
-                            onCropChange={setCrop}
-                            onZoomChange={setZoom}
-                            onCropComplete={onCropComplete}
-                        />
-                    </div>
-
-                    <DialogFooter className="mt-4">
-                        <Button onClick={handleCropDone}>Crop Image</Button>
-                        <Button variant="outline" onClick={() => setShowCropModal(false)}>
-                            Cancel
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            {imageSrc && <CropDialog imageSrc={imageSrc} open={showCropModal} onClose={() => setShowCropModal(false)} onCropped={handleCropped} />}
         </AppLayout>
     );
 }

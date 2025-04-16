@@ -173,7 +173,7 @@ export function DataTable<T extends { id: number }>({
     const [selectedItems, setSelectedItems] = useState<T[]>([]);
     const [selectedFilters, setSelectedFilters] = useState<string[]>(defaultFilters || []);
     const [perPage, setPerPage] = useState(defaultPerPage || 5);
-    console.log(data);
+
     const toggleSelectAll = (checked: boolean) => {
         setSelectedItems((prev) => {
             const currentPageIds = data.map((item) => item.id);
@@ -274,26 +274,28 @@ export function DataTable<T extends { id: number }>({
                         )}
                     </div>
 
-                    <div className="flex w-full flex-wrap justify-start gap-3 md:justify-end">
-                        <ListFilter size={16} />
-                        {filters.map(({ key, label }) => (
-                            <div key={key} className="flex items-center space-x-2">
-                                <Checkbox
-                                    id={key}
-                                    checked={selectedFilters.includes(key)}
-                                    onCheckedChange={(checked) => {
-                                        setSelectedFilters(checked ? [...selectedFilters, key] : selectedFilters.filter((f) => f !== key));
-                                    }}
-                                />
-                                <label
-                                    htmlFor={key}
-                                    className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                >
-                                    {label}
-                                </label>
-                            </div>
-                        ))}
-                    </div>
+                    {filters.length > 0 && (
+                        <div className="flex w-full flex-wrap justify-start gap-3 md:justify-end">
+                            <ListFilter size={16} />
+                            {filters.map(({ key, label }) => (
+                                <div key={key} className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id={key}
+                                        checked={selectedFilters.includes(key)}
+                                        onCheckedChange={(checked) => {
+                                            setSelectedFilters(checked ? [...selectedFilters, key] : selectedFilters.filter((f) => f !== key));
+                                        }}
+                                    />
+                                    <label
+                                        htmlFor={key}
+                                        className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                    >
+                                        {label}
+                                    </label>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Table */}
@@ -302,17 +304,17 @@ export function DataTable<T extends { id: number }>({
                         <TableHeader className="bg-gray-100">
                             <TableRow>
                                 {enableSelect && (
-                                    <TableHead className="w-10 text-center">
+                                    <TableHead className="text-center p-0 py-2.5">
                                         <Checkbox id="select-all" checked={getCheckedState()} onCheckedChange={toggleSelectAll} />
                                     </TableHead>
                                 )}
 
-                                {enableIndex && <TableHead className="w-10 text-center">#</TableHead>}
+                                {enableIndex && <TableHead className="text-center">#</TableHead>}
 
                                 {headers.map(({ key, label }) => (
                                     <TableHead
                                         key={key}
-                                        className="cursor-pointer"
+                                        className="cursor-pointer p-0 py-2.5"
                                         onClick={() => {
                                             setSelectedSort(key);
                                             setSortDirection((prev) => (selectedSort === key ? (prev === 'asc' ? 'desc' : 'asc') : 'asc'));
@@ -343,7 +345,7 @@ export function DataTable<T extends { id: number }>({
                                 data.map((item, index) => (
                                     <TableRow key={item.id} className="font-[400] odd:bg-white even:bg-gray-50">
                                         {enableSelect && (
-                                            <TableCell className="text-center">
+                                            <TableCell className="text-center p-0 py-2.5">
                                                 <Checkbox
                                                     checked={selectedItems.some((i) => i.id === item.id)}
                                                     onCheckedChange={() => toggleSelectOne(item)}
@@ -352,7 +354,7 @@ export function DataTable<T extends { id: number }>({
                                         )}
 
                                         {enableIndex && (
-                                            <TableCell className="text-center">
+                                            <TableCell className="text-center p-0 py-2.5">
                                                 <span>{indexFrom + index}</span>
                                             </TableCell>
                                         )}
@@ -360,24 +362,24 @@ export function DataTable<T extends { id: number }>({
                                         {headers.map(({ key }) => {
                                             const custom = customData?.find((c) => c.key === key);
                                             return (
-                                                <TableCell key={key} className="align-middle">
+                                                <TableCell key={key} className="align-middle p-0">
                                                     {custom ? custom.render(item, index) : String(item[key as keyof T] ?? '')}
                                                 </TableCell>
                                             );
                                         })}
 
                                         {actions && (
-                                            <TableCell className="align-middle">
+                                            <TableCell className="align-middle w-max p-0">
                                                 {typeof actions === 'function' ? (
                                                     actions(item)
                                                 ) : (
-                                                    <div className="flex gap-2">
+                                                    <div className="flex gap-2 ">
                                                         {actions.map(({ label, icon, onClick, showIf, className = '' }, idx) =>
                                                             !showIf || showIf(item) ? (
                                                                 <button
                                                                     key={idx}
                                                                     onClick={() => onClick(item)}
-                                                                    className={`flex items-center gap-2 rounded px-3 py-1 text-sm text-white shadow ${className}`}
+                                                                    className={`flex items-center gap-2 rounded-md px-2 py-0.5 text-sm text-white border-b-2 border-[#0000002f] cursor-pointer transition-all active:border-b-0 ${className}`}
                                                                 >
                                                                     {icon}
                                                                     {label}
@@ -392,7 +394,7 @@ export function DataTable<T extends { id: number }>({
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={headers.length + (enableSelect ? 1 : 0) + (actions ? 1 : 0)} className="text-center">
+                                    <TableCell colSpan={headers.length + (enableSelect ? 1 : 0) + (actions ? 1 : 0) + (enableIndex ? 1 : 0)} className="text-center p-0 py-2.5">
                                         No records found.
                                     </TableCell>
                                 </TableRow>

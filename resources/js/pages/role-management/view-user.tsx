@@ -1,37 +1,56 @@
 import Heading from '@/components/heading';
+import CropDialog from '@/components/helpers/CropDialog';
 import InputError from '@/components/input-error';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
+import { DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useInitials } from '@/hooks/use-initials';
 import AppLayout from '@/layouts/app-layout';
 import { User, type BreadcrumbItem } from '@/types';
-import getCroppedImg from '@/utils/cropImage';
 import { formatDateFull } from '@/utils/dateHelper';
 import { Transition } from '@headlessui/react';
 import { Head, router, useForm } from '@inertiajs/react';
 import { Dialog } from '@radix-ui/react-dialog';
-import { FormEventHandler, useCallback, useRef, useState } from 'react';
-import Cropper, { Area } from 'react-easy-crop';
+import { FormEventHandler, useState } from 'react';
 import { toast } from 'sonner';
 
+interface Role {
+    id: string;
+    name: string;
+    description: string;
+    created_at: string;
+    updated_at: string;
+    users: User[];
+    pivot: {
+        user_id: string;
+        role_id: string;
+    };
+}
+
+interface UserWithRoles extends User {
+    roles: Role[];
+}
+
 interface ViewUserProps {
-    user: User;
+    user: UserWithRoles;
+    roles: Role[];
 }
 
 type UpdateUserForm = {
     name: string;
     new_avatar: File | null;
     email: string;
+    rolesId: string[];
 };
 
-const ViewUser: React.FC<ViewUserProps> = ({ user }) => {
+const ViewUser: React.FC<ViewUserProps> = ({ user, roles }) => {
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'Dashboard',
-            href: '/dashboard',
+            title: 'Users',
+            href: '/users',
         },
         {
             title: `User #${user.name}`,
@@ -42,13 +61,9 @@ const ViewUser: React.FC<ViewUserProps> = ({ user }) => {
     const getInitials = useInitials();
 
     const [imageSrc, setImageSrc] = useState<string | null>(null);
-    const [crop, setCrop] = useState({ x: 0, y: 0 });
-    const [zoom, setZoom] = useState(1);
-    const [croppedAreaPixels, setCroppedAreaPixels] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
-    const inputFileRef = useRef<HTMLInputElement | null>(null);
     const [showCropModal, setShowCropModal] = useState(false);
 
-    const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
@@ -60,39 +75,26 @@ const ViewUser: React.FC<ViewUserProps> = ({ user }) => {
         reader.readAsDataURL(file);
     };
 
-    const onCropComplete = useCallback((_: Area, croppedPixels: { x: number; y: number; width: number; height: number }) => {
-        setCroppedAreaPixels(croppedPixels);
-    }, []);
-
-    const handleCropDone = async () => {
-        if (!imageSrc || !croppedAreaPixels) return;
-
-        const croppedBlob = await getCroppedImg(imageSrc, croppedAreaPixels);
-        const croppedFile = new File([croppedBlob], 'cropped-avatar.jpg', {
-            type: 'image/jpeg',
-        });
-
-        setData('new_avatar', croppedFile);
-        setShowCropModal(false);
+    const handleCropped = (file: File) => {
+        setData('new_avatar', file);
     };
 
     const { data, setData, errors, post, processing, recentlySuccessful, reset } = useForm<Required<UpdateUserForm>>({
         name: user.name,
         new_avatar: null,
         email: user.email,
+        rolesId: user.roles.map((role) => role.id),
     });
 
     const updateUser: FormEventHandler = (e) => {
         e.preventDefault();
 
         const promise = new Promise<void>((resolve, reject) => {
-            post(route('dashboard.update-user', user.id), {
+            post(route('users.update-user', user.id), {
                 preserveScroll: true,
                 onSuccess: () => {
                     reset('new_avatar');
                     resolve();
-                    setCrop({ x: 0, y: 0 });
-                    setZoom(1);
                 },
                 onError: () => {
                     reject();
@@ -112,7 +114,14 @@ const ViewUser: React.FC<ViewUserProps> = ({ user }) => {
                 error: '!text-red-700',
                 loading: '!text-blue-700',
             },
-            position: 'top-right',
+            position: 'bottom-right',
+        });
+    };
+
+    const handleToggle = (roleId: string, checked: boolean) => {
+        setData((prev) => {
+            const rolesId = checked ? [...prev.rolesId, roleId] : prev.rolesId.filter((id) => id !== roleId);
+            return { ...prev, rolesId };
         });
     };
 
@@ -156,7 +165,7 @@ const ViewUser: React.FC<ViewUserProps> = ({ user }) => {
                         </div>
                         <div>
                             <Label htmlFor="avatar">New Avatar</Label>
-                            <Input type="file" id="avatar" name="avatar" accept="image/*" onChange={onFileChange} ref={inputFileRef} />
+                            <Input type="file" id="avatar" name="avatar" accept="image/*" onChange={onFileChange} />
                             <InputError message={errors.new_avatar} />
                         </div>
                         <div>
@@ -194,6 +203,26 @@ const ViewUser: React.FC<ViewUserProps> = ({ user }) => {
                                 Send password reset link
                             </button>
                         </div>
+                        <div>
+                            <Label htmlFor="roles">Roles</Label>
+                            <ScrollArea className="h-52 w-48 rounded p-2 gap-2 flex flex-col" id="roles">
+                                {roles.map((role) => (
+                                    <div key={role.id} className="flex items-center gap-2 text-sm font-medium mb-1">
+                                        <Checkbox
+                                            id={role.id}
+                                            checked={data.rolesId.includes(role.id)}
+                                            onCheckedChange={(checked) => handleToggle(role.id, !!checked)}
+                                        />
+                                        <label
+                                            htmlFor={role.id}
+                                            className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                        >
+                                            {role.name}
+                                        </label>
+                                    </div>
+                                ))}
+                            </ScrollArea>
+                        </div>
                         <div className="flex items-center gap-2">
                             <button
                                 type="submit"
@@ -216,32 +245,7 @@ const ViewUser: React.FC<ViewUserProps> = ({ user }) => {
                 </div>
             </div>
 
-            <Dialog open={showCropModal} onOpenChange={setShowCropModal}>
-                <DialogContent className="sm:max-w-[600px]">
-                    <DialogHeader>
-                        <DialogTitle>Crop Image</DialogTitle>
-                        <DialogDescription>Adjust the crop area to select the part of the image you want to keep.</DialogDescription>
-                    </DialogHeader>
-                    <div className="relative h-[300px] w-full overflow-hidden rounded-lg bg-black">
-                        <Cropper
-                            image={imageSrc!}
-                            crop={crop}
-                            zoom={zoom}
-                            aspect={1}
-                            onCropChange={setCrop}
-                            onZoomChange={setZoom}
-                            onCropComplete={onCropComplete}
-                        />
-                    </div>
-
-                    <DialogFooter className="mt-4">
-                        <Button onClick={handleCropDone}>Crop Image</Button>
-                        <Button variant="outline" onClick={() => setShowCropModal(false)}>
-                            Cancel
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            {imageSrc && <CropDialog imageSrc={imageSrc} open={showCropModal} onClose={() => setShowCropModal(false)} onCropped={handleCropped} />}
         </AppLayout>
     );
 };

@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { NavGroup, type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Code, CodeXml, Folder, LayoutGrid, Pi } from 'lucide-react';
+import { BookOpen, Code, CodeXml, Folder, LayoutGrid, Pi, SquareDashedMousePointer, UserRoundCog, UsersRound } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavGroup[] = [
@@ -15,10 +15,6 @@ const mainNavItems: NavGroup[] = [
                 title: 'Dashboard',
                 href: '/dashboard',
                 icon: LayoutGrid,
-                routes: [
-                    '/dashboard',
-                    '/view-user',
-                ]
             },
             {
                 title: 'Programs',
@@ -27,7 +23,7 @@ const mainNavItems: NavGroup[] = [
                 subItems: [
                     {
                         title: 'Programs 1',
-                        href: '/settings/profile',
+                        href: '#',
                         icon: Pi,
                     },
                     {
@@ -51,6 +47,30 @@ const mainNavItems: NavGroup[] = [
                 title: 'Route 2',
                 href: '#',
                 icon: CodeXml,
+            },
+        ],
+    },
+    {
+        title: 'Role Management',
+        items: [
+            {
+                title: 'Users',
+                href: '/users',
+                icon: UsersRound,
+                routes: [
+                    '/dashboard',
+                    '/view',
+                ]
+            },
+            {
+                title: 'Roles',
+                href: '/roles',
+                icon: UserRoundCog,
+            },
+            {
+                title: 'Modules',
+                href: '/modules',
+                icon: SquareDashedMousePointer,
             },
         ],
     },
