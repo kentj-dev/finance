@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\RoleManagement;
 
+use App\Attributes\RoleAccess;
 use App\Models\Role;
 use App\Models\RoleModule;
 use App\Models\Module;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Controller;
 
 class RolesController extends Controller
 {
+    #[RoleAccess('Roles')]
     public function create(Request $request): InertiaResponse|RedirectResponse
     {
         $page = (int) $request->get("page", 1);
@@ -56,8 +58,6 @@ class RolesController extends Controller
 
         $allRolesCount = Role::count();
 
-        $module = Module::where('name', 'Roles')->firstOrFail();
-
         $context = [
             'roles' => $roles,
             'tableData' => [
@@ -69,8 +69,7 @@ class RolesController extends Controller
                 'perPage' => $perPage,
                 'perPagesDropdown' => $perPagesDropdown,
             ],
-            'allRolesCount' => $allRolesCount,
-            'module' => $module,
+            'allRolesCount' => $allRolesCount
         ];
 
         return Inertia::render('role-management/roles', $context);

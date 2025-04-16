@@ -1,6 +1,6 @@
 import Heading from '@/components/heading';
 import AppLayout from '@/layouts/app-layout';
-import { Module, type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -10,16 +10,12 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-interface DashboardProps {
-    module: Module;
-}
-
-export default function Dashboard({ module }: DashboardProps) {
+export default function Dashboard() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={module.name} />
+            <Head title="Dashboard" />
             <div className="px-4 py-6">
-                <Heading title={module.name} description={module.description} />
+                <Heading title="Dashboard" description="Welcome to your dashboard" />
             </div>
         </AppLayout>
     );

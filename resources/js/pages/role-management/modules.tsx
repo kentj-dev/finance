@@ -50,7 +50,6 @@ interface ModulesProps {
         perPagesDropdown: number[];
     };
     allModulesCount: number;
-    module: Module;
 }
 
 type AddModuleForm = {
@@ -58,7 +57,7 @@ type AddModuleForm = {
     description: string;
 };
 
-export default function Modules({ modules, tableData, allModulesCount, module }: ModulesProps) {
+export default function Modules({ modules, tableData, allModulesCount }: ModulesProps) {
     const [openAddModal, setOpenAddModal] = useState(false);
 
     const { data, setData, post, processing, errors } = useForm<Required<AddModuleForm>>({
@@ -105,10 +104,9 @@ export default function Modules({ modules, tableData, allModulesCount, module }:
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={module.name} />
+            <Head title="Modules" />
             <div className="px-4 py-6">
-                <Heading title={module.name} description={module.description} />
-
+                <Heading title="Modules" description="Manage the modules of the system." />
                 <div className="flex flex-col gap-2">
                     <Dialog open={openAddModal} onOpenChange={setOpenAddModal}>
                         <DialogTrigger asChild>

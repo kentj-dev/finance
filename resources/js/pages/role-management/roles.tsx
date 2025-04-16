@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
-import { Module, User, type BreadcrumbItem } from '@/types';
+import { User, type BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { LoaderCircle, Plus, ScanFace, Trash2, UsersRound } from 'lucide-react';
@@ -28,7 +28,7 @@ interface Role {
     created_at: string;
     updated_at: string;
     users: User[];
-}
+};
 
 interface RoleProps {
     roles: {
@@ -52,7 +52,6 @@ interface RoleProps {
         perPagesDropdown: number[];
     };
     allRolesCount: number;
-    module: Module;
 }
 
 type AddRoleForm = {
@@ -60,7 +59,7 @@ type AddRoleForm = {
     description: string;
 };
 
-export default function Roles({ roles, tableData, allRolesCount, module }: RoleProps) {
+export default function Roles({ roles, tableData, allRolesCount }: RoleProps) {
     const [openUsersModal, setOpenUsersModal] = useState(false);
     const [modalUsers, setModalUsers] = useState<User[]>([]);
     const [currentRoleName, setCurrentRoleName] = useState<string>('');
@@ -119,9 +118,9 @@ export default function Roles({ roles, tableData, allRolesCount, module }: RoleP
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={module.name} />
+            <Head title="Roles" />
             <div className="px-4 py-6">
-                <Heading title={module.name} description={module.description} />
+                <Heading title="Roles" description="Manage the roles and permissions for your users" />
                 <div className="flex flex-col gap-2">
                     <Dialog open={openAddModal} onOpenChange={setOpenAddModal}>
                         <DialogTrigger asChild>

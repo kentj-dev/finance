@@ -78,8 +78,6 @@ class UserController extends Controller
 
         $allUsersCount = User::count();
 
-        $module = Module::where('name', $this->moduleName)->firstOrFail();
-
         $context = [
             'users' => $allUsers,
             'tableData' => [
@@ -91,8 +89,7 @@ class UserController extends Controller
                 'perPage' => $perPage,
                 'perPagesDropdown' => $perPagesDropdown,
             ],
-            'allUsersCount' => $allUsersCount,
-            'module' => $module,
+            'allUsersCount' => $allUsersCount
         ];
 
         return Inertia::render('role-management/users', $context);

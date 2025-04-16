@@ -61,8 +61,6 @@ class ModulesController extends Controller
 
         $allModulesCount = Module::count();
 
-        $module = Module::where('name', 'Modules')->firstOrFail();
-
         $context = [
             'modules' => $modules,
             'tableData' => [
@@ -74,8 +72,7 @@ class ModulesController extends Controller
                 'perPage' => $perPage,
                 'perPagesDropdown' => $perPagesDropdown,
             ],
-            'allModulesCount' => $allModulesCount,
-            'module' => $module,
+            'allModulesCount' => $allModulesCount
         ];
 
         return Inertia::render('role-management/modules', $context);

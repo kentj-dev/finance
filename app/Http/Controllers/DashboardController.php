@@ -19,10 +19,7 @@ class DashboardController extends Controller
 {
     public function create(Request $request): InertiaResponse|RedirectResponse
     {
-        $module = Module::where('name', 'Dashboard')->firstOrFail();
 
-        return Inertia::render('dashboard', [
-            'module' => $module,
-        ]);
+        return Inertia::render('dashboard');
     }
 }

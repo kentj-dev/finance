@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useInitials } from '@/hooks/use-initials';
 import AppLayout from '@/layouts/app-layout';
-import { Module, SharedData, User, type BreadcrumbItem } from '@/types';
+import { SharedData, User, type BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { ExternalLink, KeyRound, LoaderCircle, Plus, Trash2 } from 'lucide-react';
@@ -44,7 +44,6 @@ interface UsersProps {
         perPagesDropdown: number[];
     };
     allUsersCount: number;
-    module: Module;
 }
 
 type AddUserForm = {
@@ -54,7 +53,7 @@ type AddUserForm = {
     password_confirmation: string;
 };
 
-export default function Users({ users, tableData, allUsersCount, module }: UsersProps) {
+export default function Users({ users, tableData, allUsersCount }: UsersProps) {
     console.log(users.data);
     const { auth } = usePage<SharedData>().props;
     const getInitials = useInitials();
@@ -108,9 +107,9 @@ export default function Users({ users, tableData, allUsersCount, module }: Users
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={module.name} />
+            <Head title="Users" />
             <div className="px-4 py-6">
-                <Heading title={module.name} description={module.description} />
+                <Heading title="Users" description="Manage the users of this system" />
                 <div className="flex flex-col gap-2">
                     <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
                         <div className="flex w-full items-center justify-between gap-3 sm:w-max">
