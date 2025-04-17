@@ -58,7 +58,7 @@ const mainNavItems: NavGroup[] = [
                 href: '/users',
                 icon: UsersRound,
                 routes: [
-                    '/dashboard',
+                    '/users',
                     '/view',
                 ]
             },

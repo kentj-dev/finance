@@ -25,6 +25,7 @@ class RolesController extends Controller
         $sortBy = $request->query('sortBy');
         $sortDirection = $request->query('sortDirection');
 
+        $sortFields = ['id', 'name', 'description', 'created_at'];
         $perPagesDropdown = [5, 10, 25, 50, 100];
 
         $perPage = (int) $request->query('perPage', $perPagesDropdown[0]);
@@ -33,21 +34,23 @@ class RolesController extends Controller
             $perPage = array_key_first($perPagesDropdown);
         }
 
-        $roles = Role::with('users')
-            ->when($search, function ($query, $search) {
-                $term = ltrim($search, '!');
-                $query->where(function ($q) use ($term) {
-                    $q->where('name', 'like', "%{$term}%")
-                        ->orWhere('description', 'like', "%{$term}%");
-                });
-            })
-            ->when(in_array($sortBy, ['id', 'name', 'description']) && in_array($sortDirection, ['asc', 'desc']), function ($query) use ($sortBy, $sortDirection) {
-                $query->orderBy($sortBy, $sortDirection);
-            }, function ($query) {
-                $query->orderBy('created_at', 'desc');
-            })
-            ->paginate($perPage)
-            ->withQueryString();
+        $query = Role::with('users');
+
+        if ($search) {
+            $term = ltrim($search, '!');
+            $query->where(function ($q) use ($term) {
+                $q->where('name', 'like', "%{$term}%")
+                    ->orWhere('description', 'like', "%{$term}%");
+            });
+        }
+
+        if (in_array($sortBy, $sortFields) && in_array($sortDirection, ['asc', 'desc'])) {
+            $query->orderBy($sortBy, $sortDirection);
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $roles = $query->paginate($perPage)->withQueryString();
 
         if ($page > $roles->lastPage()) {
             return redirect()->route('roles', array_merge(
@@ -75,6 +78,7 @@ class RolesController extends Controller
         return Inertia::render('role-management/roles', $context);
     }
 
+    #[RoleAccess('Roles')]
     public function delete(Request $request): RedirectResponse
     {
         $roleId = $request->route('id');
@@ -85,6 +89,7 @@ class RolesController extends Controller
         return redirect()->back();
     }
 
+    #[RoleAccess('Roles')]
     public function revokeUserRole(Request $request): RedirectResponse
     {
         $userId = $request->route('id');
@@ -102,6 +107,7 @@ class RolesController extends Controller
         return redirect()->back()->with('success', 'Role revoked successfully.');
     }
 
+    #[RoleAccess('Roles')]
     public function revertUserRole(Request $request): RedirectResponse
     {
         $userId = $request->route('id');
@@ -119,6 +125,7 @@ class RolesController extends Controller
         return redirect()->back()->with('success', 'Role restored successfully.');
     }
 
+    #[RoleAccess('Roles')]
     public function viewRolePermissions(Request $request): InertiaResponse
     {
         $roleId = $request->route('id');
@@ -135,6 +142,7 @@ class RolesController extends Controller
         return Inertia::render('role-management/manage-role', $context);
     }
 
+    #[RoleAccess('Roles')]
     public function manageRoleModulePermissions(Request $request): RedirectResponse
     {
         $roleId = $request->roleId;
@@ -189,6 +197,7 @@ class RolesController extends Controller
         return redirect()->back()->with('success', 'Role updated successfully.');
     }
 
+    #[RoleAccess('Roles')]
     public function createRole(Request $request): RedirectResponse
     {
         $request->validate([

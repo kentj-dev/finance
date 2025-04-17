@@ -2,6 +2,7 @@ import Heading from '@/components/heading';
 import CropDialog from '@/components/helpers/CropDialog';
 import InputError from '@/components/input-error';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -63,6 +64,8 @@ const ViewUser: React.FC<ViewUserProps> = ({ user, roles }) => {
     const [imageSrc, setImageSrc] = useState<string | null>(null);
     const [showCropModal, setShowCropModal] = useState(false);
 
+    const [roleSearch, setRoleSearch] = useState('');
+
     const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -85,7 +88,7 @@ const ViewUser: React.FC<ViewUserProps> = ({ user, roles }) => {
         email: user.email,
         rolesId: user.roles.map((role) => role.id),
     });
-
+    
     const updateUser: FormEventHandler = (e) => {
         e.preventDefault();
 
@@ -205,32 +208,44 @@ const ViewUser: React.FC<ViewUserProps> = ({ user, roles }) => {
                         </div>
                         <div>
                             <Label htmlFor="roles">Roles</Label>
-                            <ScrollArea className="h-52 w-48 rounded p-2 gap-2 flex flex-col" id="roles">
-                                {roles.map((role) => (
-                                    <div key={role.id} className="flex items-center gap-2 text-sm font-medium mb-1">
-                                        <Checkbox
-                                            id={role.id}
-                                            checked={data.rolesId.includes(role.id)}
-                                            onCheckedChange={(checked) => handleToggle(role.id, !!checked)}
-                                        />
-                                        <label
-                                            htmlFor={role.id}
-                                            className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                        >
-                                            {role.name}
-                                        </label>
-                                    </div>
-                                ))}
+                            <div>
+                                <input
+                                    name="role-search"
+                                    type="text"
+                                    placeholder="Search for role"
+                                    className="border-b text-xs focus:outline-none"
+                                    value={roleSearch}
+                                    onChange={(e) => setRoleSearch(e.target.value)}
+                                />
+                            </div>
+                            <ScrollArea className="flex max-h-52 w-48 flex-col gap-2 rounded p-2" id="roles">
+                                {roles.filter((role) => role.name.toLowerCase().includes(roleSearch.toLowerCase())).length > 0 ? (
+                                    roles
+                                        .filter((role) => role.name.toLowerCase().includes(roleSearch.toLowerCase()))
+                                        .map((role) => (
+                                            <div key={role.id} className="mb-1 flex items-center gap-2 text-sm font-medium">
+                                                <Checkbox
+                                                    id={role.id}
+                                                    checked={data.rolesId.includes(role.id)}
+                                                    onCheckedChange={(checked) => handleToggle(role.id, !!checked)}
+                                                />
+                                                <label
+                                                    htmlFor={role.id}
+                                                    className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                                >
+                                                    {role.name}
+                                                </label>
+                                            </div>
+                                        ))
+                                ) : (
+                                    <p className="text-muted-foreground text-xs italic">No role found.</p>
+                                )}
                             </ScrollArea>
                         </div>
                         <div className="flex items-center gap-2">
-                            <button
-                                type="submit"
-                                className="rounded-lg bg-blue-500 px-4 py-2 font-medium text-white inset-shadow-sm inset-shadow-blue-400 disabled:bg-blue-600"
-                                disabled={processing}
-                            >
+                            <Button type="submit" className="rounded bg-black px-4 py-1 text-white hover:bg-gray-800" disabled={processing}>
                                 Update User
-                            </button>
+                            </Button>
                             <Transition
                                 show={recentlySuccessful}
                                 enter="transition ease-in-out"

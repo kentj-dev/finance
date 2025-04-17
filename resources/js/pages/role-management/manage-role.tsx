@@ -2,10 +2,12 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
+import { Transition } from '@headlessui/react';
 import { Head, useForm } from '@inertiajs/react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
-type Role  = {
+type Role = {
     id: string;
     name: string;
     description: string;
@@ -51,17 +53,24 @@ export default function RolePermissions({ role, modules }: RolePermissionsProps)
 
     const handleToggle = (moduleId: string, checked: boolean) => {
         setData((prev) => {
-            const modulesId = checked ? [...prev.modulesId, moduleId] : prev.modulesId.filter((id) => id !== moduleId);
-            return { ...prev, modulesId };
+            const updated = checked ? [...prev.modulesId, moduleId] : prev.modulesId.filter((id) => id !== moduleId);
+
+            setSelectAll(updated.length === modules.length ? true : updated.length === 0 ? false : 'indeterminate');
+
+            return { ...prev, modulesId: updated };
         });
     };
 
-    const { data, setData, post, processing, errors } = useForm<Required<ManageRoleForm>>({
+    const { data, setData, post, processing, errors, recentlySuccessful } = useForm<Required<ManageRoleForm>>({
         name: role.name,
         description: role.description,
         roleId: role.id,
         modulesId: role.role_modules.map((m) => m.module_id),
     });
+
+    const [selectAll, setSelectAll] = useState<boolean | 'indeterminate'>(
+        data.modulesId.length === modules.length ? true : data.modulesId.length === 0 ? false : 'indeterminate',
+    );
 
     const handleSubmit = () => {
         const promise = new Promise<void>((resolve, reject) => {
@@ -106,6 +115,24 @@ export default function RolePermissions({ role, modules }: RolePermissionsProps)
                     />
                 </div>
                 <div className="flex flex-col gap-3">
+                    <div className="flex w-max items-center gap-2 border-b pb-2 text-sm font-medium">
+                        <Checkbox
+                            id="select-all-modules"
+                            checked={selectAll}
+                            onCheckedChange={(checked) => {
+                                const isChecked = !!checked;
+
+                                setSelectAll(isChecked);
+                                setData('modulesId', isChecked ? modules.map((m) => m.id) : []);
+                            }}
+                        />
+                        <label
+                            htmlFor="select-all-modules"
+                            className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                            Select All
+                        </label>
+                    </div>
                     {modules.map((module) => (
                         <div key={module.id} className="flex items-center gap-2 text-sm font-medium">
                             <Checkbox
@@ -130,6 +157,15 @@ export default function RolePermissions({ role, modules }: RolePermissionsProps)
                         >
                             Save Changes
                         </Button>
+                        <Transition
+                            show={recentlySuccessful}
+                            enter="transition ease-in-out"
+                            enterFrom="opacity-0"
+                            leave="transition ease-in-out"
+                            leaveTo="opacity-0"
+                        >
+                            <p className="text-sm text-neutral-600">Saved</p>
+                        </Transition>
                     </div>
                     {errors.name && <span className="text-sm font-medium text-red-500">{errors.name}</span>}
                 </div>

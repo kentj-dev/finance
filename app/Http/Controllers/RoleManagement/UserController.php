@@ -33,6 +33,7 @@ class UserController extends Controller
         $sortBy = $request->query('sortBy');
         $sortDirection = $request->query('sortDirection');
 
+        $sortFields = ['id', 'name', 'email', 'activated_at'];
         $perPagesDropdown = [5, 10, 25, 50, 100];
 
         $perPage = (int) $request->query('perPage', $perPagesDropdown[0]);
@@ -43,31 +44,34 @@ class UserController extends Controller
 
         $filterValues = array_filter(explode(',', $filters ?? ''));
 
-        $allUsers = User::query()
-            ->when(in_array('verified', $filterValues), function ($query) {
-                $query->whereNotNull('email_verified_at');
-            })
-            ->when($search, function ($query, $search) {
-                if (str_starts_with($search, '!') && strlen($search) > 1) {
-                    $term = ltrim($search, '!');
-                    $query->where(function ($q) use ($term) {
-                        $q->where('name', 'not like', "%{$term}%")
-                            ->where('email', 'not like', "%{$term}%");
-                    });
-                } else {
-                    $query->where(function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%");
-                    });
-                }
-            })
-            ->when(in_array($sortBy, ['id', 'name', 'email']) && in_array($sortDirection, ['asc', 'desc']), function ($query) use ($sortBy, $sortDirection) {
-                $query->orderBy($sortBy, $sortDirection);
-            }, function ($query) {
-                $query->orderBy('created_at', 'desc');
-            })
-            ->paginate($perPage)
-            ->withQueryString();
+        $filterMap = [
+            'verified' => fn($query) => $query->whereNotNull('email_verified_at'),
+            'active' => fn($query) => $query->whereNotNull('activated_at'),
+        ];
+
+        $query = User::query();
+
+        foreach ($filterValues as $filter) {
+            if (array_key_exists($filter, $filterMap)) {
+                $filterMap[$filter]($query);
+            }
+        }
+
+        if ($search) {
+            $term = ltrim($search, '!');
+            $query->where(function ($q) use ($term) {
+                $q->where('name', 'like', "%{$term}%")
+                    ->orWhere('email', 'like', "%{$term}%");
+            });
+        }
+
+        if (in_array($sortBy, $sortFields) && in_array($sortDirection, ['asc', 'desc'])) {
+            $query->orderBy($sortBy, $sortDirection);
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $allUsers = $query->paginate($perPage)->withQueryString();
 
         if ($page > $allUsers->lastPage()) {
             return redirect()->route('users', array_merge(

@@ -13,9 +13,11 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Attributes\RoleAccess;
 
 class ModulesController extends Controller
 {
+    #[RoleAccess('Modules')]
     public function create(Request $request): InertiaResponse|RedirectResponse
     {
         $page = (int) $request->get("page", 1);
@@ -23,6 +25,7 @@ class ModulesController extends Controller
         $sortBy = $request->query('sortBy');
         $sortDirection = $request->query('sortDirection');
 
+        $sortFields = ['id', 'name', 'description', 'created_at'];
         $perPagesDropdown = [5, 10, 25, 50, 100];
 
         $perPage = (int) $request->query('perPage', $perPagesDropdown[0]);
@@ -31,21 +34,23 @@ class ModulesController extends Controller
             $perPage = array_key_first($perPagesDropdown);
         }
 
-        $modules = Module::with('roles.users')
-            ->when($search, function ($query, $search) {
-                $term = ltrim($search, '!');
-                $query->where(function ($q) use ($term) {
-                    $q->where('name', 'like', "%{$term}%")
-                        ->orWhere('description', 'like', "%{$term}%");
-                });
-            })
-            ->when(in_array($sortBy, ['id', 'name', 'description', 'created_at']) && in_array($sortDirection, ['asc', 'desc']), function ($query) use ($sortBy, $sortDirection) {
-                $query->orderBy($sortBy, $sortDirection);
-            }, function ($query) {
-                $query->orderBy('created_at', 'desc');
-            })
-            ->paginate($perPage)
-            ->withQueryString();
+        $query = Module::with('roles.users');
+
+        if ($search) {
+            $term = ltrim($search, '!');
+            $query->where(function ($q) use ($term) {
+                $q->where('name', 'like', "%{$term}%")
+                    ->orWhere('description', 'like', "%{$term}%");
+            });
+        }
+
+        if (in_array($sortBy, $sortFields) && in_array($sortDirection, ['asc', 'desc'])) {
+            $query->orderBy($sortBy, $sortDirection);
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $modules = $query->paginate($perPage)->withQueryString();
 
         $modules->getCollection()->transform(function ($module) {
             $module->users = $module->roles->flatMap->users->unique('id')->values();
@@ -78,6 +83,7 @@ class ModulesController extends Controller
         return Inertia::render('role-management/modules', $context);
     }
 
+    #[RoleAccess('Modules')]
     public function viewManageModule(Request $request): InertiaResponse
     {
         $moduleId = $request->route('id');
@@ -94,6 +100,7 @@ class ModulesController extends Controller
         return Inertia::render('role-management/manage-module', $context);
     }
 
+    #[RoleAccess('Modules')]
     public function updateModulePermissions(Request $request): RedirectResponse
     {
         $moduleId = $request->moduleId;
@@ -148,6 +155,7 @@ class ModulesController extends Controller
         return redirect()->back()->with('success', 'Module updated successfully.');
     }
 
+    #[RoleAccess('Modules')]
     public function createModule(Request $request): RedirectResponse
     {
         $request->validate([
@@ -175,6 +183,7 @@ class ModulesController extends Controller
         return redirect()->back()->with('success', 'Module added successfully.');
     }
 
+    #[RoleAccess('Modules')]
     public function delete(Request $request): RedirectResponse
     {
         $moduleId = $request->route('id');
