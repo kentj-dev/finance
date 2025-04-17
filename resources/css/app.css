@@ -9,7 +9,8 @@
 @custom-variant dark (&:is(.dark *));
 
 body {
-    font-family: 'Geist', sans-serif;
+    font-family: 'Geist', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
     font-optical-sizing: auto;
     font-style: normal;
 }
@@ -85,7 +86,7 @@ body {
 
 :root {
     --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
+    --foreground: oklch(0.26 0 0);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
