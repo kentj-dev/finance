@@ -304,7 +304,7 @@ export function DataTable<T extends { id: number }>({
                         <TableHeader className="bg-gray-100">
                             <TableRow>
                                 {enableSelect && (
-                                    <TableHead className="text-center p-0 py-2.5">
+                                    <TableHead className="text-center py-2.5">
                                         <Checkbox id="select-all" checked={getCheckedState()} onCheckedChange={toggleSelectAll} />
                                     </TableHead>
                                 )}
@@ -314,7 +314,7 @@ export function DataTable<T extends { id: number }>({
                                 {headers.map(({ key, label }) => (
                                     <TableHead
                                         key={key}
-                                        className="cursor-pointer p-0 py-2.5"
+                                        className="cursor-pointer py-2.5"
                                         onClick={() => {
                                             setSelectedSort(key);
                                             setSortDirection((prev) => (selectedSort === key ? (prev === 'asc' ? 'desc' : 'asc') : 'asc'));
@@ -345,7 +345,7 @@ export function DataTable<T extends { id: number }>({
                                 data.map((item, index) => (
                                     <TableRow key={item.id} className="font-[400] odd:bg-white even:bg-gray-50">
                                         {enableSelect && (
-                                            <TableCell className="text-center p-0 py-2.5">
+                                            <TableCell className="text-center w-10 py-2.5">
                                                 <Checkbox
                                                     checked={selectedItems.some((i) => i.id === item.id)}
                                                     onCheckedChange={() => toggleSelectOne(item)}
@@ -354,7 +354,7 @@ export function DataTable<T extends { id: number }>({
                                         )}
 
                                         {enableIndex && (
-                                            <TableCell className="text-center p-0 py-2.5">
+                                            <TableCell className="text-center w-10 py-2.5">
                                                 <span>{indexFrom + index}</span>
                                             </TableCell>
                                         )}
@@ -362,14 +362,14 @@ export function DataTable<T extends { id: number }>({
                                         {headers.map(({ key }) => {
                                             const custom = customData?.find((c) => c.key === key);
                                             return (
-                                                <TableCell key={key} className="align-middle p-0">
+                                                <TableCell key={key} className="align-middle">
                                                     {custom ? custom.render(item, index) : String(item[key as keyof T] ?? '')}
                                                 </TableCell>
                                             );
                                         })}
 
                                         {actions && (
-                                            <TableCell className="align-middle w-max p-0">
+                                            <TableCell className="align-middle w-max">
                                                 {typeof actions === 'function' ? (
                                                     actions(item)
                                                 ) : (
@@ -394,7 +394,7 @@ export function DataTable<T extends { id: number }>({
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={headers.length + (enableSelect ? 1 : 0) + (actions ? 1 : 0) + (enableIndex ? 1 : 0)} className="text-center p-0 py-2.5">
+                                    <TableCell colSpan={headers.length + (enableSelect ? 1 : 0) + (actions ? 1 : 0) + (enableIndex ? 1 : 0)} className="text-center py-2.5">
                                         No records found.
                                     </TableCell>
                                 </TableRow>
