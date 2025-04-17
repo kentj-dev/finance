@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { NavGroup, type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Code, CodeXml, Folder, LayoutGrid, Pi, SquareDashedMousePointer, UserRoundCog, UsersRound } from 'lucide-react';
+import { CircleUserRound, Code, CodeXml, LayoutGrid, Pi, SquareDashedMousePointer, UserRoundCog, UsersRound } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavGroup[] = [
@@ -31,7 +31,7 @@ const mainNavItems: NavGroup[] = [
                         href: '#',
                         icon: Pi,
                     },
-                ]
+                ],
             },
         ],
     },
@@ -57,10 +57,7 @@ const mainNavItems: NavGroup[] = [
                 title: 'Users',
                 href: '/users',
                 icon: UsersRound,
-                routes: [
-                    '/users',
-                    '/view',
-                ]
+                routes: ['/users', '/view'],
             },
             {
                 title: 'Roles',
@@ -78,14 +75,9 @@ const mainNavItems: NavGroup[] = [
 
 const footerNavItems: NavItem[] = [
     {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits',
-        icon: BookOpen,
+        title: 'Client Dashboard',
+        href: '/',
+        icon: CircleUserRound,
     },
 ];
 

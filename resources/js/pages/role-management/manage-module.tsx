@@ -17,6 +17,7 @@ type Role = {
         id: string;
         module_id: string;
     }[];
+    for_admin: boolean;
 };
 
 type Module = {
@@ -71,8 +72,10 @@ export default function ManageModule({ module, roles }: ManageModuleProps) {
         rolesId: module.roles.map((role) => role.id),
     });
 
+    const selectableRoles = roles.filter((role) => role.for_admin).map((role) => role.id);
+
     const [selectAll, setSelectAll] = useState<boolean | 'indeterminate'>(
-        data.rolesId.length === roles.length ? true : data.rolesId.length === 0 ? false : 'indeterminate',
+        data.rolesId.length === 0 ? false : data.rolesId.every((id) => selectableRoles.includes(id)) ? true : 'indeterminate',
     );
 
     const handleSubmit = () => {
@@ -126,7 +129,10 @@ export default function ManageModule({ module, roles }: ManageModuleProps) {
                                 const isChecked = !!checked;
 
                                 setSelectAll(isChecked);
-                                setData('rolesId', isChecked ? roles.map((m) => m.id) : []);
+
+                                const selectableRoles = roles.filter((role) => role.for_admin).map((role) => role.id);
+
+                                setData('rolesId', isChecked ? selectableRoles : []);
                             }}
                         />
                         <label
@@ -142,6 +148,7 @@ export default function ManageModule({ module, roles }: ManageModuleProps) {
                                 id={role.id}
                                 checked={data.rolesId.includes(role.id)}
                                 onCheckedChange={(checked) => handleToggle(role.id, !!checked)}
+                                disabled={!role.for_admin}
                             />
                             <label
                                 htmlFor={role.id}

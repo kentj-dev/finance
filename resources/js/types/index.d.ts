@@ -3,6 +3,7 @@ import type { Config } from 'ziggy-js';
 
 export interface Auth {
     user: User;
+    is_admin: boolean;
     modules: string[];
 }
 
@@ -26,6 +27,7 @@ export interface NavItem {
 }
 
 export interface SharedData {
+    appCompany: string;
     appName: string;
     name: string;
     // quote: { message: string; author: string };

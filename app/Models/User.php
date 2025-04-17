@@ -61,6 +61,11 @@ class User extends Authenticatable
             ->wherePivotNull('deleted_at');
     }
 
+    public function hasAdminRole(): bool
+    {
+        return $this->roles()->where('for_admin', true)->exists();
+    }
+
     public static function booted()
     {
         static::creating(function ($user) {

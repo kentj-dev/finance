@@ -19,6 +19,7 @@ class Role extends Model
     protected $fillable = [
         'name',
         'description',
+        'for_admin'
     ];
 
     protected $hidden = [

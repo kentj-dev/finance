@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+/* In your app.css */
 
 @plugin 'tailwindcss-animate';
 
@@ -7,9 +8,14 @@
 
 @custom-variant dark (&:is(.dark *));
 
+body {
+    font-family: 'Geist', sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+}
+
 @theme {
-    --font-sans:
-        'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -154,6 +160,6 @@
     }
 
     body {
-        @apply bg-background text-foreground;
+        @apply bg-background text-foreground scroll-smooth;
     }
 }

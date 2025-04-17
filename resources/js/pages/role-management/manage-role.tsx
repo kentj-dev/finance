@@ -17,6 +17,7 @@ type Role = {
         id: string;
         module_id: string;
     }[];
+    for_admin: boolean;
 };
 
 type Module = {
@@ -35,6 +36,7 @@ interface RolePermissionsProps {
 type ManageRoleForm = {
     name: string;
     description: string;
+    for_admin: boolean;
     roleId: string;
     modulesId: string[];
 };
@@ -64,6 +66,7 @@ export default function RolePermissions({ role, modules }: RolePermissionsProps)
     const { data, setData, post, processing, errors, recentlySuccessful } = useForm<Required<ManageRoleForm>>({
         name: role.name,
         description: role.description,
+        for_admin: role.for_admin,
         roleId: role.id,
         modulesId: role.role_modules.map((m) => m.module_id),
     });
@@ -117,6 +120,31 @@ export default function RolePermissions({ role, modules }: RolePermissionsProps)
                 <div className="flex flex-col gap-3">
                     <div className="flex w-max items-center gap-2 border-b pb-2 text-sm font-medium">
                         <Checkbox
+                            id="for-admin"
+                            checked={data.for_admin ? true : false}
+                            onCheckedChange={(checked) => {
+                                const isChecked = !!checked;
+                                setData('for_admin', isChecked);
+
+                                if (isChecked) {
+                                    const allIds = modules.map((m) => m.id);
+                                    setData('modulesId', allIds);
+                                    setSelectAll(true);
+                                } else {
+                                    setData('modulesId', []);
+                                    setSelectAll(false);
+                                }
+                            }}
+                        />
+                        <label
+                            htmlFor="for-admin"
+                            className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                            Can access admin dashboard
+                        </label>
+                    </div>
+                    <div className="flex w-max items-center gap-2 border-b pb-2 text-sm font-medium">
+                        <Checkbox
                             id="select-all-modules"
                             checked={selectAll}
                             onCheckedChange={(checked) => {
@@ -125,6 +153,7 @@ export default function RolePermissions({ role, modules }: RolePermissionsProps)
                                 setSelectAll(isChecked);
                                 setData('modulesId', isChecked ? modules.map((m) => m.id) : []);
                             }}
+                            disabled={!data.for_admin}
                         />
                         <label
                             htmlFor="select-all-modules"
@@ -139,6 +168,7 @@ export default function RolePermissions({ role, modules }: RolePermissionsProps)
                                 id={module.id}
                                 checked={data.modulesId.includes(module.id)}
                                 onCheckedChange={(checked) => handleToggle(module.id, !!checked)}
+                                disabled={!data.for_admin}
                             />
                             <label
                                 htmlFor={module.id}

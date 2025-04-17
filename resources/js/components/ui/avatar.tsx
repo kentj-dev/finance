@@ -3,7 +3,7 @@ import * as AvatarPrimitive from "@radix-ui/react-avatar"
 
 import { cn } from "@/lib/utils"
 
-function Avatar({
+function AvatarComponent({
   className,
   ...props
 }: React.ComponentProps<typeof AvatarPrimitive.Root>) {
@@ -19,7 +19,7 @@ function Avatar({
   )
 }
 
-function AvatarImage({
+function AvatarImageComponent({
   className,
   ...props
 }: React.ComponentProps<typeof AvatarPrimitive.Image>) {
@@ -32,7 +32,7 @@ function AvatarImage({
   )
 }
 
-function AvatarFallback({
+function AvatarFallbackComponent({
   className,
   ...props
 }: React.ComponentProps<typeof AvatarPrimitive.Fallback>) {
@@ -47,5 +47,9 @@ function AvatarFallback({
     />
   )
 }
+
+const Avatar = React.memo(AvatarComponent)
+const AvatarImage = React.memo(AvatarImageComponent)
+const AvatarFallback = React.memo(AvatarFallbackComponent)
 
 export { Avatar, AvatarImage, AvatarFallback }

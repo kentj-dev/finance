@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Client\ClientDashboardController;
 use App\Http\Controllers\RoleManagement\RolesController;
 use App\Http\Controllers\RoleManagement\ModulesController;
 use App\Http\Controllers\User\ActivateController;
@@ -12,10 +13,6 @@ use App\Http\Middleware\RedirectIfActivated;
 
 // * if dealing with files, use post method even in updating.
 
-Route::get('/', function () {
-    return Inertia::render('welcome');
-})->name('home');
-
 Route::middleware(['auth', 'verified', RedirectIfActivated::class])->group(function () {
     Route::get('activate-account', [ActivateController::class, 'create'])
         ->name('activate-account');
@@ -25,6 +22,8 @@ Route::middleware(['auth', 'verified', RedirectIfActivated::class])->group(funct
 });
 
 Route::middleware(['auth', 'verified', EnsureUserIsActivated::class, 'module.access'])->group(function () {
+    Route::get('/', [ClientDashboardController::class, 'create'])->name('home');
+
     Route::get('dashboard', [DashboardController::class, 'create'])
         ->name('dashboard');
 
@@ -73,5 +72,6 @@ Route::middleware(['auth', 'verified', EnsureUserIsActivated::class, 'module.acc
         ->name('modules.delete-module');
 });
 
+require __DIR__ . '/client-settings.php';
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

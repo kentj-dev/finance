@@ -51,8 +51,11 @@ class HandleInertiaRequests extends Middleware
 
         return [
             ...parent::share($request),
+            'appCompany' => config('app.company'),
+            'appName' => config('app.name'),
             'auth' => [
                 'user' => $request->user(),
+                'is_admin' => $request->user()?->hasAdminRole(),
                 'modules' => $accessibleModules,
             ],
             'ziggy' => fn (): array => [

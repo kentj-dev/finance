@@ -164,8 +164,9 @@ class RolesController extends Controller
         $modulesId = $request->modulesId ?? [];
         $roleName = $request->name;
         $roleDescription = $request->description;
+        $forAdmin = $request->for_admin ?? false;
 
-        DB::transaction(function () use ($roleId, $modulesId, $roleName, $roleDescription) {
+        DB::transaction(function () use ($roleId, $modulesId, $roleName, $roleDescription, $forAdmin) {
             foreach ($modulesId as $moduleId) {
                 $existing = RoleModule::withTrashed()
                     ->where('role_id', $roleId)
@@ -191,6 +192,7 @@ class RolesController extends Controller
                 ->update([
                     'name' => $roleName,
                     'description' => $roleDescription,
+                    'for_admin' => $forAdmin
                 ]);
         });
 
